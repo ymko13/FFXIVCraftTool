@@ -7,6 +7,7 @@ CraftingTool.doCraft = false
 CraftingTool.LastSkillUseTime = 0
 CraftingTool.WaitTime = 3000
 
+CraftingTool.prevItemId = 0
 CraftingTool.ProgressGain = 0
 CraftingTool.BuffTime = 0
 
@@ -43,13 +44,14 @@ function CraftingTool.ModuleInit()
 	--Crafting
 	GUI_NewField("CraftingTool","Item ID","itemID", "Crafting")
 	GUI_NewField("CraftingTool","Steps To Finish","stepsLeft", "Crafting")
+	GUI_NewField("CraftingTool","Last Skill Used","lSkill", "Crafting")
 	GUI_NewField("CraftingTool","Crafting","cCraft", "Crafting")
 	GUI_NewField("CraftingTool","CraftLog Open","clOpen", "Crafting")
 	GUI_NewButton("CraftingTool", "Start\\Stop", "CraftingTool.Craft","Crafting") 
 	RegisterEventHandler("CraftingTool.Craft", CraftingTool.Craft)
 	--Skills
 	--DO NOT OPEN
-	GUI_NewField("CraftingTool", "Artifact Fix", "artfixvar","Don't open this(fix)")
+	GUI_NewField("CraftingTool", "Artifact Fix", "artfixvar","Fix")
 	--Win Size
 	GUI_SizeWindow("CraftingTool",300,200)
 	
@@ -76,19 +78,19 @@ function Initialise()
 	local localLookUp = {
 		["WVR"] = {
 			["100060"] = { ["actionType"] = "Progress", ["chance"] = "90", ["buffid"] = "0", ["name"] = "Basic Synthesis", ["level"] = "1", ["cost"] = "0" },
-			["100061"] = { ["actionType"] = "Quality", ["chance"] = "70", ["buffid"] = "0", ["name"] = "Basic Touch", ["level"] = "1", ["cost"] = "0"  },
-			["100062"] = { ["actionType"] = "Durability", ["chance"] = "30", ["buffid"] = "0", ["name"] = "Master's Mend", ["level"] = "1", ["cost"] = "0"  },
-			["248"] = { ["actionType"] = "Buff", ["chance"] = "0", ["buffid"] = "253", ["name"] = "Steady Hand", ["level"] = "1", ["cost"] = "0"  },
-			["256"] = { ["actionType"] = "Buff", ["chance"] = "0", ["buffid"] = "251", ["name"] = "Inner-Quiet", ["level"] = "1", ["cost"] = "0"  },
-			["100070"] = { ["actionType"] = "Skip", ["chance"] = "100", ["buffid"] = "0", ["name"] = "Observe", ["level"] = "1", ["cost"] = "0"  },
-			["100063"] = { ["actionType"] = "Progress", ["chance"] = "100", ["buffid"] = "0", ["name"] = "Careful Synthesis", ["level"] = "1", ["cost"] = "0"  },
-			["100064"] = { ["actionType"] = "Quality", ["chance"] = "70", ["buffid"] = "0", ["name"] = "Standard Touch", ["level"] = "1", ["cost"] = "0"  },
-			["264"] = { ["actionType"] = "Buff", ["chance"] = "90", ["buffid"] = "254", ["name"] = "Great Strides", ["level"] = "1", ["cost"] = "0"  },
-			["100065"] = { ["actionType"] = "Durability", ["chance"] = "60", ["buffid"] = "0", ["name"] = "Master's Mend II", ["level"] = "1", ["cost"] = "0"  },
-			["100067"] = { ["actionType"] = "Progress", ["chance"] = "90", ["buffid"] = "0", ["name"] = "Standard Synthesis", ["level"] = "1", ["cost"] = "0"  },
-			["100066"] = { ["actionType"] = "Progress", ["chance"] = "90", ["buffid"] = "0", ["name"] = "Brand of Lightning", ["level"] = "1", ["cost"] = "0"  },
-			["100068"] = { ["actionType"] = "Quality", ["chance"] = "90", ["buffid"] = "0", ["name"] = "Advanced Touch", ["level"] = "1", ["cost"] = "0"  },
-			["100069"] = { ["actionType"] = "Progress", ["chance"] = "100", ["buffid"] = "0", ["name"] = "Careful Synthesis II", ["level"] = "1", ["cost"] = "0"  }
+			["100061"] = { ["actionType"] = "Quality", ["chance"] = "70", ["buffid"] = "0", ["name"] = "Basic Touch", ["level"] = "5", ["cost"] = "18"  },
+			["100062"] = { ["actionType"] = "Durability", ["chance"] = "30", ["buffid"] = "0", ["name"] = "Master's Mend", ["level"] = "7", ["cost"] = "92"  },
+			["248"] = { ["actionType"] = "Buff", ["chance"] = "0", ["buffid"] = "253", ["name"] = "Steady Hand", ["level"] = "9", ["cost"] = "22"  },
+			["256"] = { ["actionType"] = "Buff", ["chance"] = "0", ["buffid"] = "251", ["name"] = "Inner-Quiet", ["level"] = "11", ["cost"] = "18"  },
+			["100070"] = { ["actionType"] = "Skip", ["chance"] = "100", ["buffid"] = "0", ["name"] = "Observe", ["level"] = "13", ["cost"] = "14"  },
+			["100063"] = { ["actionType"] = "Progress", ["chance"] = "100", ["buffid"] = "0", ["name"] = "Careful Synthesis", ["level"] = "15", ["cost"] = "0"  },
+			["100064"] = { ["actionType"] = "Quality", ["chance"] = "70", ["buffid"] = "0", ["name"] = "Standard Touch", ["level"] = "18", ["cost"] = "32"  },
+			["264"] = { ["actionType"] = "Buff", ["chance"] = "90", ["buffid"] = "254", ["name"] = "Great Strides", ["level"] = "21", ["cost"] = "32"  },
+			["100065"] = { ["actionType"] = "Durability", ["chance"] = "60", ["buffid"] = "0", ["name"] = "Master's Mend II", ["level"] = "25", ["cost"] = "160"  },
+			["100067"] = { ["actionType"] = "Progress", ["chance"] = "90", ["buffid"] = "0", ["name"] = "Standard Synthesis", ["level"] = "31", ["cost"] = "15"  },
+			["100066"] = { ["actionType"] = "Progress", ["chance"] = "90", ["buffid"] = "0", ["name"] = "Brand of Lightning", ["level"] = "37", ["cost"] = "15"  },
+			["100068"] = { ["actionType"] = "Quality", ["chance"] = "90", ["buffid"] = "0", ["name"] = "Advanced Touch", ["level"] = "43", ["cost"] = "48"  },
+			["100069"] = { ["actionType"] = "Progress", ["chance"] = "100", ["buffid"] = "0", ["name"] = "Careful Synthesis II", ["level"] = "50", ["cost"] = "0"  }
 		}
 	}
 	for z=8,15 do
@@ -170,119 +172,104 @@ end
 function GUIUpdate()
 	Settings.CraftingTool["gCraftProf"] = gCraftProf
 	
-	GUI_DeleteGroup("CraftingTool","AvailableSkills")	
-	
-	for i,e in pairs(CraftingTool.Skills[gCraftProf]) do
-		GUI_NewCheckBox("CraftingTool",e.name,gCraftProf..i, "AvailableSkills")
+	for i,k in pairs(CraftingTool.actionType) do
+		GUI_DeleteGroup("CraftingTool", k.."Skills")
 	end
-end
-
-function CraftingTool.Update(Event, ticks)
-end
---[[
-
-function CraftingTool.GUIVARUpdate(Event, NewVals, OldVals)
-	for k,v in pairs(NewVals) do
-		if (k == "sCraft" or k == "hqCraft" or k == "Observe" or k == "oneStep")  then
-			Settings.FFXIVMINION[tostring(k)] = v
+	GUI_DeleteGroup("CraftingTool","Fix")	
+	
+	for i=0,13 do
+		local skill = CraftingTool.Skills[gCraftProf]["S"..i]
+		if(skill) then
+			local skillHandle = gCraftProf.."-S"..skill
+			GUI_NewCheckbox("CraftingTool",skill.name,skillHandle, skill.actionType .. "Skills")
+			if(Settings.CraftingTool[skillHandle] == nil) then
+				Settings.CraftingTool[skillHandle] = 0
+			end
+			d("Name: " .. skill.name .. " Handle: " .. skillHandle)
 		end
 	end
-	GUI_RefreshWindow("CraftingTool")
+	
+	for i,k in pairs(CraftingTool.actionType) do
+		GUI_UnFoldGroup("CraftingTool", k.."Skills")
+	end
+	
+	GUI_NewField("CraftingTool", "Artifact Fix", "artfixvar","Fix")
 end
 
 function CraftingTool.Update(Event, ticks)
 	cCraft = tostring(CraftingTool.doCraft)
 	clOpen = tostring(Crafting:IsCraftingLogOpen())
 	
-	if(not CraftingTool.Init) then
-		CraftingTool.Init = true
-		Initialise()
-	end
-	
-	if(sCraft == "1" and hqCraft == "1") then --makes sure that you dont select both crafts
-		sCraft = "0"
-		hqCraft = "0"
-	end
-	
-	if(CraftingTool.doCraft and (sCraft == "1" or hqCraft == "1")) then
-		 --
-		--d("" .. tostring(ticks - CraftingTool.LastSkillUseTime))
+	if(CraftingTool.doCraft) then
 		if(ticks - CraftingTool.LastSkillUseTime > CraftingTool.WaitTime) then
 			local synth = Crafting:SynthInfo()
-			if ( synth ) then
+			if(synth) then
 				itemID = synth.itemid
-				stepsLeft = tostring(StepsToFinish(synth.progressmax - synth.progress))
-				--if Simple Craft only use Basic Synthesis
-				--if HQ craft use Carefull Synthesis to determine the amount of turn needed
-				--then use Great Strides then if Good or better use Standard Touch\Basic Touch if enough CP else Carefull Synthesis(used first to determine no of steps to finish)
-				--When 1 step left to finish only use Great Strides + Standard Touch\BasicTouch.
-				if(sCraft == "1") then
-					if(not synth.progress == 0 and not CraftingTool.FirstUse and oneStep == "0") then
-						CraftingTool.FirstUse = true
-						CraftingTool.ProgressGain = synth.progress
-					end
-					MakeStep(NextStepID(synth))
-				elseif(hqCraft == "1") then
+				if(prevItemId ~= synth.itemid) then
+					CraftingTool.prevItemId = synth.itemid
+					CraftingTool.ProgressGain = 0
+					CraftingTool.FirstUse = false
+				end
+				if(CraftingTool.FirstUse) then
 					
 				end
+				local skill = SelectSkill(synth)
+				lSkill = skill.name
 			else
 				if (not Crafting:IsCraftingLogOpen()) then
 					Crafting:ToggleCraftingLog()
-				else
+				elseif(Crafting:CanCraftSelectedItem())
 					Crafting:CraftSelectedItem()
 					Crafting:ToggleCraftingLog()
-					CraftingTool.ProgressGain = 0
-					CraftingTool.FirstUse = false
+					CraftingTool.BuffTime = 0
 					CraftingTool.WaitTime = 3000
 				end
 			end
-			CraftingTool.LastSkillUseTime = ticks
 		end
 	end
 end
 
+function SelectStepType(synth)
+	local progress = synth.progress
+	local progressmax = synth.progressmax
+	local quality = synth.quality
+	local qualitymax = synth.qualitymax
+	local durability = synth.durablity
+	local durabilitymax = synth.durablitymax
+	local description = synth.description
+	local playerLevel = Player.level
+	local playerCP = Player.current.cp
+	
+	local stepsToFinish = StepsToFinish(progressmax - progress)
+	
+	if(not CraftingTool.FirstUse and stepsToFinish ~= 1) then
+		return CraftingTool.actionType["0"] --Craft
+	elseif(durability == 10 and playerCP > 91)
+		return CraftingTool.actionType["2"] --Durability
+	elseif(durability == stepsToFinish * 10)
+		return CraftingTool.actionType["0"] --Craft
+	elseif()
+		
+	end
+end
+
+function SelectSkill(synth)
+	local stepType = SelectStepType(synth)
+	
+	
+end
+
 function StepsToFinish(Left)
 	local steps = 0
-	if(oneStep == "1") then
-		return 1
-	end
+	
 	while(Left > 0 and CraftingTool.ProgressGain > 0) do
 		Left = Left - CraftingTool.ProgressGain
 		steps = steps + 1
 	end
+	
 	return steps
 end
 
-function NextStepID(Synth)
-	if(sCraft == "1") then
-		--Returns the value of simplest skill in the chosen proffesion
-		return SelectSkill(CraftingTool.Skills[gCraftProf])
-	end
-	if(hqCraft == "1") then
-
-	end
-end
-
-function SelectSkill(skills)
-	if(skills) then
-		local i,e = next (skills)
-		while ( i and e ) do
-			if ( e.Base.level == 1 ) then
-				return e.Base.id
-			end
-			i,e = next (skills,i)
-		end	
-	else
-		return 0
-	end	
-end
-
---264/Great-Strides 100063/Careful-Synthesis 100064/Standard-Touch 100061/Basic-Touch 100060/Basic-Synthesis 100070/Observe
-function MakeStep(SkillID)
-	
-	CraftingTool.WaitTime = 2500
-end
-]]--
 --register our function
 RegisterEventHandler("Gameloop.Update", CraftingTool.Update) -- the normal pulse from the gameloop
 RegisterEventHandler("Module.Initalize", CraftingTool.ModuleInit)

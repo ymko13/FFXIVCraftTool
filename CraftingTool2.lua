@@ -73,7 +73,6 @@ function CraftingTool.Update(Event, ticks)
 	end
 	
 	if(CraftingTool.doCraft and (sCraft == "1" or hqCraft21 == "1")) then
-		 --
 		--d("" .. tostring(ticks - CraftingTool.LastSkillUseTime))
 		if(ticks - CraftingTool.LastSkillUseTime > CraftingTool.WaitTime) then
 			local synth = Crafting:SynthInfo()
