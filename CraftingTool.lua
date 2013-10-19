@@ -37,15 +37,17 @@ CraftingTool.Skills = { } --Made Runtime
 -- Initializing function, we create a new Window for our module that has 1 button and 1 field to display data:
 function CraftingTool.ModuleInit()
 	GUI_NewWindow("CraftingTool",600,200,300,200)
-	--Craft GUI gCraftProf
-	GUI_NewField("CraftingTool","Profession","gCraftProf", "Crafting")
+	--Crafting proffesion
+	GUI_NewComboBox("CraftingTool","Profession","gCraftProf", "Profession Selection", "None")
+	GUI_UnFoldGroup("CraftingTool","Profession Selection")
+	--Crafting
 	GUI_NewField("CraftingTool","Item ID","itemID", "Crafting")
 	GUI_NewField("CraftingTool","Steps To Finish","stepsLeft", "Crafting")
 	GUI_NewField("CraftingTool","Crafting","cCraft", "Crafting")
 	GUI_NewField("CraftingTool","CraftLog Open","clOpen", "Crafting")
 	GUI_NewButton("CraftingTool", "Start\\Stop", "CraftingTool.Craft","Crafting") 
 	RegisterEventHandler("CraftingTool.Craft", CraftingTool.Craft)
-	
+	--Skills
 	--DO NOT OPEN
 	GUI_NewField("CraftingTool", "Artifact Fix", "artfixvar","Don't open this(fix)")
 	--Win Size
@@ -54,10 +56,20 @@ function CraftingTool.ModuleInit()
 	Initialise()
 	--Init Values
 	
+	gCraftProf_listitems = ""
+	for i,e in pairs(CraftingTool.cLookUpProf) do
+		if(e.init) then
+			gCraftProf_listitems = gCraftProf_listitems..","..i
+		end
+		d(i .. " init: " .. tostring(e.init))
+	end
+	
 	if (Settings.CraftingTool.gCraftProf == nil) then
-		Settings.CraftingTool.gCraftProf = "0"
+		Settings.CraftingTool.gCraftProf = "WVR"
 	end
 	gCraftProf = Settings.CraftingTool.gCraftProf
+	
+	
 end
 
 function Initialise()
@@ -79,7 +91,6 @@ function Initialise()
 			["100069"] = { ["actionType"] = "Progress", ["chance"] = "100", ["buffid"] = "0", ["name"] = "Careful Synthesis II", ["level"] = "1", ["cost"] = "0"  }
 		}
 	}
-	
 	for z=8,15 do
 		local skilllist = ActionList("type=1,job="..z)
 		local theProf = getProf(z)
@@ -119,6 +130,7 @@ function Initialise()
 				i,e = next (localLookUp[theProf],i)
 			end
 			d("Initialised the " .. theProf .. " profession")
+			CraftingTool.cLookUpProf[theProf].init = true
 		else
 			d("No skill list found for " .. theProf)
 		end
@@ -139,10 +151,34 @@ function getProf(id)
 	return localLookUp[tostring(id)]
 end
 
+
 function CraftingTool.Craft( dir )
 	CraftingTool.doCraft = not CraftingTool.doCraft
 end
 
+function CraftingTool.GUIVARUpdate(Event, NewVals, OldVals)
+	for k,v in pairs(NewVals) do
+		if(k == "gCraftProf") then
+			GUIUpdate()
+		else
+			Settings.CraftingTool[tostring(k)] = v
+		end
+	end
+	GUI_RefreshWindow("CraftingTool")
+end
+
+function GUIUpdate()
+	Settings.CraftingTool["gCraftProf"] = gCraftProf
+	
+	GUI_DeleteGroup("CraftingTool","AvailableSkills")	
+	
+	for i,e in pairs(CraftingTool.Skills[gCraftProf]) do
+		GUI_NewCheckBox("CraftingTool",e.name,gCraftProf..i, "AvailableSkills")
+	end
+end
+
+function CraftingTool.Update(Event, ticks)
+end
 --[[
 
 function CraftingTool.GUIVARUpdate(Event, NewVals, OldVals)
