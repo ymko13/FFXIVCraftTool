@@ -143,6 +143,8 @@ function CraftingTool.Craft( dir )
 	CraftingTool.doCraft = not CraftingTool.doCraft
 end
 
+--[[
+
 function CraftingTool.GUIVARUpdate(Event, NewVals, OldVals)
 	for k,v in pairs(NewVals) do
 		if (k == "sCraft" or k == "hqCraft" or k == "Observe" or k == "oneStep")  then
@@ -244,7 +246,7 @@ function MakeStep(SkillID)
 	
 	CraftingTool.WaitTime = 2500
 end
-
+]]--
 --register our function
 RegisterEventHandler("Gameloop.Update", CraftingTool.Update) -- the normal pulse from the gameloop
 RegisterEventHandler("Module.Initalize", CraftingTool.ModuleInit)
