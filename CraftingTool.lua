@@ -5,11 +5,11 @@ CraftingTool={ }
 CraftingTool.doCraft = false
 
 CraftingTool.LastSkillUseTime = 0
-CraftingTool.WaitTime = 3000
+CraftingTool.WaitTime = 5000
 
 CraftingTool.prevItemId = 0
 CraftingTool.ProgressGain = 0
-CraftingTool.BuffTime = 0
+CraftingTool.Buffs = {}
 
 CraftingTool.FirstUse = false
 
@@ -47,6 +47,10 @@ function CraftingTool.ModuleInit()
 	GUI_NewField("CraftingTool","Last Skill Used","lSkill", "Crafting")
 	GUI_NewField("CraftingTool","Crafting","cCraft", "Crafting")
 	GUI_NewField("CraftingTool","CraftLog Open","clOpen", "Crafting")
+	GUI_NewField("CraftingTool"," ","emptyVar", "Crafting")
+	GUI_NewCheckbox("CraftingTool","Use Quality","useQuality", "Crafting")
+	GUI_NewCheckbox("CraftingTool","Use Durability","useDurability", "Crafting")
+	GUI_NewCheckbox("CraftingTool","Use Buffs","useBuffs", "Crafting")
 	GUI_NewButton("CraftingTool", "Start\\Stop", "CraftingTool.Craft","Crafting") 
 	RegisterEventHandler("CraftingTool.Craft", CraftingTool.Craft)
 	--Skills
@@ -71,7 +75,22 @@ function CraftingTool.ModuleInit()
 	end
 	gCraftProf = Settings.CraftingTool.gCraftProf
 	
+	if (Settings.CraftingTool.useQuality == nil) then
+		Settings.CraftingTool.useQuality = "0"
+	end
+	useQuality = Settings.CraftingTool.useQuality
 	
+	if (Settings.CraftingTool.useDurability == nil) then
+		Settings.CraftingTool.useDurability = "0"
+	end
+	useDurability = Settings.CraftingTool.useDurability
+	
+	if (Settings.CraftingTool.useBuffs == nil) then
+		Settings.CraftingTool.useBuffs = "0"
+	end
+	useBuffs = Settings.CraftingTool.useBuffs
+	
+	GUIUpdate()
 end
 
 function Initialise()
@@ -107,27 +126,30 @@ function Initialise()
 				local skill = skilllist[tonumber(i)]
 				if(skill) then
 					CraftingTool.Skills.WVR[sName] = {
-					["id"] = skill.id,
+					["id"] = tonumber(skill.id),
 					["name"] = skill.name, 
-					["cost"] = skill.cost, 
-					["level"] = skill.level,
+					["cost"] = tonumber(skill.cost), 
+					["level"] = tonumber(skill.level),
 					["actionType"] = e.actionType,
-					["chance"] = e.chance,
-					["buffid"] = e.buffid
+					["chance"] = tonumber(e.chance),
+					["buffid"] = tonumber(e.buffid)
 					}
 					found = true
 				else
 					CraftingTool.Skills.WVR[sName] = {
-					["id"] = i,
+					["id"] = tonumber(i),
 					["name"] = e.name, 
-					["cost"] = e.cost, 
-					["level"] = e.level,
+					["cost"] = tonumber(e.cost), 
+					["level"] = tonumber(e.level),
 					["actionType"] = e.actionType,
-					["chance"] = e.chance,
-					["buffid"] = e.buffid
+					["chance"] = tonumber(e.chance),
+					["buffid"] = tonumber(e.buffid)
 					}
 				end
 				d( sName .. " -> " .. " ID: " .. i .. " Name:" .. e.name .. " Cost:" .. e.cost .. " Level:" .. e.level .. " Type:" .. e.actionType .. " Chance:" .. e.chance .. " BuffID:" .. e.buffid .. " -> F:" .. tostring(found))
+				if(CraftingTool.Skills.WVR[sName].actionType == "Buffs") then
+					CraftingTool.Buffs[CraftingTool.Skills.WVR[sName].buffid] = { ["id"] = CraftingTool.Skills.WVR[sName].buffid, ["length"] = 0 }
+				end
 				index = index + 1
 				i,e = next (localLookUp[theProf],i)
 			end
@@ -152,7 +174,6 @@ function getProf(id)
 	}
 	return localLookUp[tostring(id)]
 end
-
 
 function CraftingTool.Craft( dir )
 	CraftingTool.doCraft = not CraftingTool.doCraft
@@ -180,19 +201,20 @@ function GUIUpdate()
 	for i=0,13 do
 		local skill = CraftingTool.Skills[gCraftProf]["S"..i]
 		if(skill) then
-			local skillHandle = gCraftProf.."-S"..skill
-			GUI_NewCheckbox("CraftingTool",skill.name,skillHandle, skill.actionType .. "Skills")
-			if(Settings.CraftingTool[skillHandle] == nil) then
-				Settings.CraftingTool[skillHandle] = 0
+			local skillHandle = "S"..i
+			GUI_NewCheckbox("CraftingTool",skill.name, gCraftProf.."."..skillHandle , skill.actionType .. "Skills")
+			if(Settings.CraftingTool[gCraftProf.."."..skillHandle] == nil) then
+				Settings.CraftingTool[gCraftProf.."."..skillHandle] = "0"
+			else
+				_G[gCraftProf ..".".."S"..i] = Settings.CraftingTool[gCraftProf.."."..skillHandle]
 			end
-			d("Name: " .. skill.name .. " Handle: " .. skillHandle)
+			d("Name: " .. skill.name .. " Handle: " .. gCraftProf.."."..skillHandle)
 		end
 	end
 	
 	for i,k in pairs(CraftingTool.actionType) do
 		GUI_UnFoldGroup("CraftingTool", k.."Skills")
 	end
-	
 	GUI_NewField("CraftingTool", "Artifact Fix", "artfixvar","Fix")
 end
 
@@ -205,26 +227,37 @@ function CraftingTool.Update(Event, ticks)
 			local synth = Crafting:SynthInfo()
 			if(synth) then
 				itemID = synth.itemid
+				--If it's a different item then set this stuff to def and change the id of the item
 				if(prevItemId ~= synth.itemid) then
 					CraftingTool.prevItemId = synth.itemid
 					CraftingTool.ProgressGain = 0
 					CraftingTool.FirstUse = false
 				end
-				if(CraftingTool.FirstUse) then
-					
+				--If I haven't used Progress before on this type of item then tell me how much progress will i get every use of the skill
+				if(not CraftingTool.FirstUse) then
+					if(synth.progress > 0) then
+						CraftingTool.ProgressGain = synth.progress
+						CraftingTool.FirstUse = true
+					end
 				end
+				
 				local skill = SelectSkill(synth)
-				lSkill = skill.name
+				if(skill) then
+					lSkill = skill.name
+					d(skill.name)
+					UseSkill(skill)
+				end
 			else
 				if (not Crafting:IsCraftingLogOpen()) then
 					Crafting:ToggleCraftingLog()
-				elseif(Crafting:CanCraftSelectedItem())
+				elseif(Crafting:CanCraftSelectedItem()) then
 					Crafting:CraftSelectedItem()
 					Crafting:ToggleCraftingLog()
-					CraftingTool.BuffTime = 0
+					CraftingTool.Buffs = {}
 					CraftingTool.WaitTime = 3000
 				end
 			end
+			CraftingTool.LastSkillUseTime = ticks
 		end
 	end
 end
@@ -235,28 +268,88 @@ function SelectStepType(synth)
 	local quality = synth.quality
 	local qualitymax = synth.qualitymax
 	local durability = synth.durablity
-	local durabilitymax = synth.durablitymax
 	local description = synth.description
 	local playerLevel = Player.level
-	local playerCP = Player.current.cp
+	local playerCP = Player.cp.current
 	
 	local stepsToFinish = StepsToFinish(progressmax - progress)
-	
+	stepsLeft = tostring(stepsToFinish)
 	if(not CraftingTool.FirstUse and stepsToFinish ~= 1) then
 		return CraftingTool.actionType["0"] --Craft
-	elseif(durability == 10 and playerCP > 91)
+	elseif(durability == 10 and playerCP > 91 and useDurability == "1") then
 		return CraftingTool.actionType["2"] --Durability
-	elseif(durability == stepsToFinish * 10)
+	elseif(durability == stepsToFinish * 10 or playerLevel < 3) then
 		return CraftingTool.actionType["0"] --Craft
-	elseif()
-		
+	elseif(description == "Excellent" or description == "Good" and useQuality == "1") then
+		return CraftingTool.actionType["1"] --Quality
+	elseif(NeedToRecastBuffs() and useBuffs == "1") then
+		return CraftingTool.actionType["3"] --Buffs
+	else
+		if(qualitymax - quality == 0 or useQuality == "0") then
+			return CraftingTool.actionType["0"]
+		else
+			return CraftingTool.actionType["1"] --Quality 
+		end
 	end
 end
 
+function NeedToRecastBuffs()
+	
+end
+
 function SelectSkill(synth)
+	local playerLevel = Player.level
+	local playerCP = Player.cp.current
+	
 	local stepType = SelectStepType(synth)
-	
-	
+	d(stepType)
+	local skillList = CraftingTool.Skills[gCraftProf]
+	local bestSkill = nil
+	if(skillList) then
+		d("Skill List Live")
+		for i=0,13 do
+			local skillHandle = gCraftProf ..".".."S"..i
+			if(Settings.CraftingTool[skillHandle] == "1") then
+				d("Pass " .. i .. " Current Best: " .. ((bestSkill == nil) and "nil" or bestSkill.name))
+				local k = CraftingTool.Skills[gCraftProf]["S"..i]
+				if(k) then
+					if(k.level <= playerLevel) then
+						d("Checking against " .. k.name)
+						if(stepType == CraftingTool.actionType["0"]) then
+							if(k.level == 37) then
+							else
+								if(bestSkill ~= nil) then
+									if((k.chance >= bestSkill.chance or k.level >= bestSkill.level) and playerCP >= k.cost) then
+										bestSkill = k
+									end
+								else
+									bestSkill = k
+								end
+							end
+						elseif(stepType == CraftingTool.actionType["1"]) then
+							if(k.level <= playerLevel)
+						elseif(stepType == CraftingTool.actionType["2"]) then
+							if(synth.durabilitymax - synth.durability > 50) then
+								if(k.chance > 50) then bestSkill = k end
+							else
+								if(k.chance < 50) then bestSkill = k end
+							end
+						elseif(stepType == CraftingTool.actionType["3"]) then
+							
+						end
+					end
+				end
+			end
+		end
+	end
+	return bestSkill
+end
+
+function UseSkill(Skill)
+	for i,k in pairs(CraftingTool.Buffs) do
+		k.length = ((k.length - 1 >= 0) and k.length - 1 or 0)
+	end
+	ActionList:Cast(Skill.id,0)
 end
 
 function StepsToFinish(Left)
