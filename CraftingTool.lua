@@ -344,8 +344,10 @@ function NeedToRecastBuffs()
 	for i,k in pairs(CraftingTool.Buffs[gCraftProf]) do
 		if(not IfPlayerHasBuff(k.id)) then
 			if(_G[gCraftProf .."."..i] == "1") then
-				needtorecast = true
-				break
+				if(Player.cp.current >= CraftingTool.Skills[gCraftProf][i].cost) then
+					needtorecast = true
+					break
+				end
 			end
 		end
 	end
