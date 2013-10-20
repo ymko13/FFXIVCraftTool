@@ -5,7 +5,7 @@ CraftingTool={ }
 CraftingTool.doCraft = false
 
 CraftingTool.LastSkillUseTime = 0
-CraftingTool.WaitTime = 5000
+CraftingTool.WaitTime = 3000
 
 CraftingTool.prevItemId = 0
 CraftingTool.ProgressGain = 0
@@ -96,20 +96,20 @@ end
 function Initialise()
 	local localLookUp = {
 		["WVR"] = {
-			["100060"] = { ["actionType"] = "Progress", ["chance"] = "90", ["buffid"] = "0", ["name"] = "Basic Synthesis", ["level"] = "1", ["cost"] = "0" },
-			["100061"] = { ["actionType"] = "Quality", ["chance"] = "70", ["buffid"] = "0", ["name"] = "Basic Touch", ["level"] = "5", ["cost"] = "18"  },
-			["100062"] = { ["actionType"] = "Durability", ["chance"] = "30", ["buffid"] = "0", ["name"] = "Master's Mend", ["level"] = "7", ["cost"] = "92"  },
-			["248"] = { ["actionType"] = "Buff", ["chance"] = "0", ["buffid"] = "253", ["name"] = "Steady Hand", ["level"] = "9", ["cost"] = "22"  },
-			["256"] = { ["actionType"] = "Buff", ["chance"] = "0", ["buffid"] = "251", ["name"] = "Inner-Quiet", ["level"] = "11", ["cost"] = "18"  },
-			["100070"] = { ["actionType"] = "Skip", ["chance"] = "100", ["buffid"] = "0", ["name"] = "Observe", ["level"] = "13", ["cost"] = "14"  },
-			["100063"] = { ["actionType"] = "Progress", ["chance"] = "100", ["buffid"] = "0", ["name"] = "Careful Synthesis", ["level"] = "15", ["cost"] = "0"  },
-			["100064"] = { ["actionType"] = "Quality", ["chance"] = "70", ["buffid"] = "0", ["name"] = "Standard Touch", ["level"] = "18", ["cost"] = "32"  },
-			["264"] = { ["actionType"] = "Buff", ["chance"] = "90", ["buffid"] = "254", ["name"] = "Great Strides", ["level"] = "21", ["cost"] = "32"  },
-			["100065"] = { ["actionType"] = "Durability", ["chance"] = "60", ["buffid"] = "0", ["name"] = "Master's Mend II", ["level"] = "25", ["cost"] = "160"  },
-			["100067"] = { ["actionType"] = "Progress", ["chance"] = "90", ["buffid"] = "0", ["name"] = "Standard Synthesis", ["level"] = "31", ["cost"] = "15"  },
-			["100066"] = { ["actionType"] = "Progress", ["chance"] = "90", ["buffid"] = "0", ["name"] = "Brand of Lightning", ["level"] = "37", ["cost"] = "15"  },
-			["100068"] = { ["actionType"] = "Quality", ["chance"] = "90", ["buffid"] = "0", ["name"] = "Advanced Touch", ["level"] = "43", ["cost"] = "48"  },
-			["100069"] = { ["actionType"] = "Progress", ["chance"] = "100", ["buffid"] = "0", ["name"] = "Careful Synthesis II", ["level"] = "50", ["cost"] = "0"  }
+			["100060"] = { ["actionType"] = CraftingTool.actionType["0"], ["chance"] = "90", ["buffid"] = "0", ["name"] = "Basic Synthesis", ["level"] = "1", ["cost"] = "0" },
+			["100061"] = { ["actionType"] = CraftingTool.actionType["1"], ["chance"] = "70", ["buffid"] = "0", ["name"] = "Basic Touch", ["level"] = "5", ["cost"] = "18"  },
+			["100062"] = { ["actionType"] = CraftingTool.actionType["2"], ["chance"] = "30", ["buffid"] = "0", ["name"] = "Master's Mend", ["level"] = "7", ["cost"] = "92"  },
+			["248"] = { ["actionType"] = CraftingTool.actionType["3"], ["chance"] = "0", ["buffid"] = "253", ["name"] = "Steady Hand", ["level"] = "9", ["cost"] = "22"  },
+			["256"] = { ["actionType"] = CraftingTool.actionType["3"], ["chance"] = "0", ["buffid"] = "251", ["name"] = "Inner-Quiet", ["level"] = "11", ["cost"] = "18"  },
+			["100070"] = { ["actionType"] = CraftingTool.actionType["4"], ["chance"] = "100", ["buffid"] = "0", ["name"] = "Observe", ["level"] = "13", ["cost"] = "14"  },
+			["100063"] = { ["actionType"] = CraftingTool.actionType["0"], ["chance"] = "100", ["buffid"] = "0", ["name"] = "Careful Synthesis", ["level"] = "15", ["cost"] = "0"  },
+			["100064"] = { ["actionType"] = CraftingTool.actionType["1"], ["chance"] = "70", ["buffid"] = "0", ["name"] = "Standard Touch", ["level"] = "18", ["cost"] = "32"  },
+			["264"] = { ["actionType"] = CraftingTool.actionType["3"], ["chance"] = "90", ["buffid"] = "254", ["name"] = "Great Strides", ["level"] = "21", ["cost"] = "32"  },
+			["100065"] = { ["actionType"] = CraftingTool.actionType["2"], ["chance"] = "60", ["buffid"] = "0", ["name"] = "Master's Mend II", ["level"] = "25", ["cost"] = "160"  },
+			["100067"] = { ["actionType"] = CraftingTool.actionType["0"], ["chance"] = "90", ["buffid"] = "0", ["name"] = "Standard Synthesis", ["level"] = "31", ["cost"] = "15"  },
+			["100066"] = { ["actionType"] = CraftingTool.actionType["0"], ["chance"] = "90", ["buffid"] = "0", ["name"] = "Brand of Lightning", ["level"] = "37", ["cost"] = "15"  },
+			["100068"] = { ["actionType"] = CraftingTool.actionType["1"], ["chance"] = "90", ["buffid"] = "0", ["name"] = "Advanced Touch", ["level"] = "43", ["cost"] = "48"  },
+			["100069"] = { ["actionType"] = CraftingTool.actionType["0"], ["chance"] = "100", ["buffid"] = "0", ["name"] = "Careful Synthesis II", ["level"] = "50", ["cost"] = "0"  }
 		}
 	}
 	for z=8,15 do
@@ -244,7 +244,6 @@ function CraftingTool.Update(Event, ticks)
 				local skill = SelectSkill(synth)
 				if(skill) then
 					lSkill = skill.name
-					d(skill.name)
 					UseSkill(skill)
 				end
 			else
@@ -254,7 +253,7 @@ function CraftingTool.Update(Event, ticks)
 					Crafting:CraftSelectedItem()
 					Crafting:ToggleCraftingLog()
 					CraftingTool.Buffs = {}
-					CraftingTool.WaitTime = 3000
+					CraftingTool.WaitTime = 3500
 				end
 			end
 			CraftingTool.LastSkillUseTime = ticks
@@ -267,34 +266,42 @@ function SelectStepType(synth)
 	local progressmax = synth.progressmax
 	local quality = synth.quality
 	local qualitymax = synth.qualitymax
-	local durability = synth.durablity
+	local durability = synth.durability
 	local description = synth.description
 	local playerLevel = Player.level
 	local playerCP = Player.cp.current
 	
-	local stepsToFinish = StepsToFinish(progressmax - progress)
+	local stepsToFinish = tonumber(StepsToFinish(progressmax - progress))
 	stepsLeft = tostring(stepsToFinish)
 	if(not CraftingTool.FirstUse and stepsToFinish ~= 1) then
 		return CraftingTool.actionType["0"] --Craft
 	elseif(durability == 10 and playerCP > 91 and useDurability == "1") then
 		return CraftingTool.actionType["2"] --Durability
-	elseif(durability == stepsToFinish * 10 or playerLevel < 3) then
+	elseif(durability == stepsToFinish * 10) then
 		return CraftingTool.actionType["0"] --Craft
-	elseif(description == "Excellent" or description == "Good" and useQuality == "1") then
+	elseif(durability > 10 and (description == "Excellent" or description == "Good") and useQuality == "1" and playerCP > 17) then
 		return CraftingTool.actionType["1"] --Quality
 	elseif(NeedToRecastBuffs() and useBuffs == "1") then
 		return CraftingTool.actionType["3"] --Buffs
 	else
-		if(qualitymax - quality == 0 or useQuality == "0") then
-			return CraftingTool.actionType["0"]
-		else
+		if(durability > 10 and useQuality == "1" and qualitymax - quality ~= 0) then
 			return CraftingTool.actionType["1"] --Quality 
+		else
+			return CraftingTool.actionType["0"] --Craft
 		end
 	end
 end
 
 function NeedToRecastBuffs()
-	
+	local needtorecast = false
+	for i,k in pairs(CraftingTool.Buffs) do
+		if(not IfPlayerHasBuff(k.id)) then
+			if(
+			needtorecast = true
+			break
+		end
+	end
+	return needtorecast
 end
 
 function SelectSkill(synth)
@@ -302,53 +309,79 @@ function SelectSkill(synth)
 	local playerCP = Player.cp.current
 	
 	local stepType = SelectStepType(synth)
-	d(stepType)
+	
 	local skillList = CraftingTool.Skills[gCraftProf]
 	local bestSkill = nil
 	if(skillList) then
-		d("Skill List Live")
+		--d("Skill List Live")
 		for i=0,13 do
 			local skillHandle = gCraftProf ..".".."S"..i
 			if(Settings.CraftingTool[skillHandle] == "1") then
-				d("Pass " .. i .. " Current Best: " .. ((bestSkill == nil) and "nil" or bestSkill.name))
+				--d("Pass " .. i .. " Current Best: " .. ((bestSkill == nil) and "nil" or bestSkill.name))
 				local k = CraftingTool.Skills[gCraftProf]["S"..i]
 				if(k) then
-					if(k.level <= playerLevel) then
-						d("Checking against " .. k.name)
-						if(stepType == CraftingTool.actionType["0"]) then
-							if(k.level == 37) then
-							else
+					if(k.actionType == stepType) then 
+						if(k.level <= playerLevel) then
+							--d("Checking against " .. k.name)
+							if(stepType == CraftingTool.actionType["0"]) then
+								if(k.level == 37) then
+								else
+									if(bestSkill ~= nil) then
+										if((k.chance >= bestSkill.chance or k.level >= bestSkill.level) and playerCP >= k.cost) then
+											bestSkill = k
+										end
+									else
+										bestSkill = k
+									end
+								end
+							elseif(stepType == CraftingTool.actionType["1"]) then
 								if(bestSkill ~= nil) then
-									if((k.chance >= bestSkill.chance or k.level >= bestSkill.level) and playerCP >= k.cost) then
+									if(k.cost <= playerCP and k.level >= bestSkill.level) then
 										bestSkill = k
 									end
 								else
 									bestSkill = k
 								end
+							elseif(stepType == CraftingTool.actionType["2"]) then
+								if(synth.durabilitymax - synth.durability > 50) then
+									if(k.chance > 50) then bestSkill = k end
+								else
+									if(k.chance < 50) then bestSkill = k end
+								end
+							elseif(stepType == CraftingTool.actionType["3"]) then
+								if(not IfPlayerHasBuff(k.buffid)) then
+									bestSkill = k
+								end
 							end
-						elseif(stepType == CraftingTool.actionType["1"]) then
-							if(k.level <= playerLevel)
-						elseif(stepType == CraftingTool.actionType["2"]) then
-							if(synth.durabilitymax - synth.durability > 50) then
-								if(k.chance > 50) then bestSkill = k end
-							else
-								if(k.chance < 50) then bestSkill = k end
-							end
-						elseif(stepType == CraftingTool.actionType["3"]) then
-							
 						end
 					end
 				end
 			end
 		end
 	end
+	d(stepType .. " " .. bestSkill.name)
 	return bestSkill
+end
+
+function IfPlayerHasBuff(buffid)
+	local buffs = Player.buffs
+	local i,e = next (buffs)
+	local exists = false
+	while ( i and e ) do
+		if ( e.id == buffid ) then
+			exists = true
+			break
+		end
+		i,e = next (buffs,i)
+	end	
+	return exists
 end
 
 function UseSkill(Skill)
 	for i,k in pairs(CraftingTool.Buffs) do
 		k.length = ((k.length - 1 >= 0) and k.length - 1 or 0)
 	end
+	CraftingTool.WaitTime = 3000
 	ActionList:Cast(Skill.id,0)
 end
 
