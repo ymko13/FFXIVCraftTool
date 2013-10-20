@@ -48,9 +48,6 @@ function CraftingTool.ModuleInit()
 	GUI_NewField("CraftingTool","Crafting","cCraft", "Crafting")
 	GUI_NewField("CraftingTool","CraftLog Open","clOpen", "Crafting")
 	GUI_NewField("CraftingTool"," ","emptyVar", "Crafting")
-	GUI_NewCheckbox("CraftingTool","Use Quality","useQuality", "Crafting")
-	GUI_NewCheckbox("CraftingTool","Use Durability","useDurability", "Crafting")
-	GUI_NewCheckbox("CraftingTool","Use Buffs","useBuffs", "Crafting")
 	GUI_NewButton("CraftingTool", "Start\\Stop", "CraftingTool.Craft","Crafting") 
 	RegisterEventHandler("CraftingTool.Craft", CraftingTool.Craft)
 	--Skills
@@ -75,6 +72,13 @@ function CraftingTool.ModuleInit()
 	end
 	gCraftProf = Settings.CraftingTool.gCraftProf
 	
+	GUIUpdate()
+	
+	if (Settings.CraftingTool.useProgress == nil) then
+		Settings.CraftingTool.useProgress = "1"
+	end
+	useProgress = Settings.CraftingTool.useProgress
+	
 	if (Settings.CraftingTool.useQuality == nil) then
 		Settings.CraftingTool.useQuality = "0"
 	end
@@ -85,12 +89,15 @@ function CraftingTool.ModuleInit()
 	end
 	useDurability = Settings.CraftingTool.useDurability
 	
-	if (Settings.CraftingTool.useBuffs == nil) then
-		Settings.CraftingTool.useBuffs = "0"
+	if (Settings.CraftingTool.useBuff == nil) then
+		Settings.CraftingTool.useBuff = "0"
 	end
-	useBuffs = Settings.CraftingTool.useBuffs
+	useBuff = Settings.CraftingTool.useBuff
 	
-	GUIUpdate()
+	if (Settings.CraftingTool.useSkip == nil) then
+		Settings.CraftingTool.useSkip = "0"
+	end
+	useSkip = Settings.CraftingTool.useSkip
 end
 
 function Initialise()
@@ -100,7 +107,7 @@ function Initialise()
 			["100061"] = { ["actionType"] = CraftingTool.actionType["1"], ["chance"] = "70", ["buffid"] = "0", ["name"] = "Basic Touch", ["level"] = "5", ["cost"] = "18"  },
 			["100062"] = { ["actionType"] = CraftingTool.actionType["2"], ["chance"] = "30", ["buffid"] = "0", ["name"] = "Master's Mend", ["level"] = "7", ["cost"] = "92"  },
 			["248"] = { ["actionType"] = CraftingTool.actionType["3"], ["chance"] = "0", ["buffid"] = "253", ["name"] = "Steady Hand", ["level"] = "9", ["cost"] = "22"  },
-			["256"] = { ["actionType"] = CraftingTool.actionType["3"], ["chance"] = "0", ["buffid"] = "251", ["name"] = "Inner-Quiet", ["level"] = "11", ["cost"] = "18"  },
+			["256"] = { ["actionType"] = CraftingTool.actionType["3"], ["chance"] = "0", ["buffid"] = "251", ["name"] = "Inner Quiet", ["level"] = "11", ["cost"] = "18"  },
 			["100070"] = { ["actionType"] = CraftingTool.actionType["4"], ["chance"] = "100", ["buffid"] = "0", ["name"] = "Observe", ["level"] = "13", ["cost"] = "14"  },
 			["100063"] = { ["actionType"] = CraftingTool.actionType["0"], ["chance"] = "100", ["buffid"] = "0", ["name"] = "Careful Synthesis", ["level"] = "15", ["cost"] = "0"  },
 			["100064"] = { ["actionType"] = CraftingTool.actionType["1"], ["chance"] = "70", ["buffid"] = "0", ["name"] = "Standard Touch", ["level"] = "18", ["cost"] = "32"  },
@@ -110,22 +117,40 @@ function Initialise()
 			["100066"] = { ["actionType"] = CraftingTool.actionType["0"], ["chance"] = "90", ["buffid"] = "0", ["name"] = "Brand of Lightning", ["level"] = "37", ["cost"] = "15"  },
 			["100068"] = { ["actionType"] = CraftingTool.actionType["1"], ["chance"] = "90", ["buffid"] = "0", ["name"] = "Advanced Touch", ["level"] = "43", ["cost"] = "48"  },
 			["100069"] = { ["actionType"] = CraftingTool.actionType["0"], ["chance"] = "100", ["buffid"] = "0", ["name"] = "Careful Synthesis II", ["level"] = "50", ["cost"] = "0"  }
-		}
+		},
+		["CUL"] = {
+             ["100105"] = { ["actionType"] = CraftingTool.actionType["0"], ["chance"] = "90", ["buffid"] = "0", ["name"] = "Basic Synthesis", ["level"] = "1", ["cost"] = "0" },
+             ["100106"] = { ["actionType"] = CraftingTool.actionType["1"], ["chance"] = "70", ["buffid"] = "0", ["name"] = "Basic Touch", ["level"] = "5", ["cost"] = "18"  },
+             ["100107"] = { ["actionType"] = CraftingTool.actionType["2"], ["chance"] = "30", ["buffid"] = "0", ["name"] = "Master's Mend", ["level"] = "7", ["cost"] = "92"  },
+             ["251"] = { ["actionType"] = CraftingTool.actionType["3"], ["chance"] = "0", ["buffid"] = "253", ["name"] = "Steady Hand", ["level"] = "9", ["cost"] = "22"  },
+             ["259"] = { ["actionType"] = CraftingTool.actionType["3"], ["chance"] = "0", ["buffid"] = "251", ["name"] = "Inner Quiet", ["level"] = "11", ["cost"] = "18"  },
+             ["100113"] = { ["actionType"] = CraftingTool.actionType["4"], ["chance"] = "100", ["buffid"] = "0", ["name"] = "Observe", ["level"] = "13", ["cost"] = "14"  },
+             ["100108"] = { ["actionType"] = CraftingTool.actionType["0"], ["chance"] = "50", ["buffid"] = "0", ["name"] = "Hasty Touch", ["level"] = "15", ["cost"] = "0"  },
+             ["100109"] = { ["actionType"] = CraftingTool.actionType["1"], ["chance"] = "80", ["buffid"] = "0", ["name"] = "Standard Touch", ["level"] = "18", ["cost"] = "32"  },
+             ["267"] = { ["actionType"] = CraftingTool.actionType["3"], ["chance"] = "90", ["buffid"] = "254", ["name"] = "Great Strides", ["level"] = "21", ["cost"] = "32"  },
+             ["100110"] = { ["actionType"] = CraftingTool.actionType["2"], ["chance"] = "60", ["buffid"] = "0", ["name"] = "Master's Mend II", ["level"] = "25", ["cost"] = "160"  },
+             ["100111"] = { ["actionType"] = CraftingTool.actionType["0"], ["chance"] = "90", ["buffid"] = "0", ["name"] = "Standard Synthesis", ["level"] = "31", ["cost"] = "15"  },
+             ["281"] = { ["actionType"] = CraftingTool.actionType["3"], ["chance"] = "0", ["buffid"] = "262", ["name"] = "Steady Hand II", ["level"] = "37", ["cost"] = "25"  },
+             ["100112"] = { ["actionType"] = CraftingTool.actionType["1"], ["chance"] = "90", ["buffid"] = "0", ["name"] = "Advanced Touch", ["level"] = "43", ["cost"] = "48"  },
+             ["287"] = { ["actionType"] = CraftingTool.actionType["3"], ["chance"] = "0", ["buffid"] = "260", ["name"] = "Reclaim", ["level"] = "50", ["cost"] = "55"  }
+         },
 	}
 	for z=8,15 do
 		local skilllist = ActionList("type=1,job="..z)
 		local theProf = getProf(z)
 		CraftingTool.Skills[theProf] = {}
+		CraftingTool.Buffs[theProf] = {}
 		local index = 0
 		if(localLookUp[theProf]) then
 			local i,e = next (localLookUp[theProf])
 			while ( i and e ) do
 				local sName = "S" .. index
-				CraftingTool.Skills.WVR[sName] = {}
+				CraftingTool.Skills[theProf][sName] = {}
 				local found = false
+				
 				local skill = skilllist[tonumber(i)]
 				if(skill) then
-					CraftingTool.Skills.WVR[sName] = {
+					CraftingTool.Skills[theProf][sName] = {
 					["id"] = tonumber(skill.id),
 					["name"] = skill.name, 
 					["cost"] = tonumber(skill.cost), 
@@ -136,7 +161,7 @@ function Initialise()
 					}
 					found = true
 				else
-					CraftingTool.Skills.WVR[sName] = {
+					CraftingTool.Skills[theProf][sName] = {
 					["id"] = tonumber(i),
 					["name"] = e.name, 
 					["cost"] = tonumber(e.cost), 
@@ -147,9 +172,13 @@ function Initialise()
 					}
 				end
 				d( sName .. " -> " .. " ID: " .. i .. " Name:" .. e.name .. " Cost:" .. e.cost .. " Level:" .. e.level .. " Type:" .. e.actionType .. " Chance:" .. e.chance .. " BuffID:" .. e.buffid .. " -> F:" .. tostring(found))
-				if(CraftingTool.Skills.WVR[sName].actionType == "Buffs") then
-					CraftingTool.Buffs[CraftingTool.Skills.WVR[sName].buffid] = { ["id"] = CraftingTool.Skills.WVR[sName].buffid, ["length"] = 0 }
+				
+				if(e.actionType == CraftingTool.actionType["3"]) then
+					d("IN => " .. e.buffid .. " 0")
+					CraftingTool.Buffs[theProf][sName] = { ["id"] = tonumber(e.buffid), ["length"] = 0 }
+					d("OUT => " .. CraftingTool.Buffs[theProf][sName].id .. " " .. CraftingTool.Buffs[theProf][sName].length)
 				end
+				
 				index = index + 1
 				i,e = next (localLookUp[theProf],i)
 			end
@@ -159,6 +188,20 @@ function Initialise()
 			d("No skill list found for " .. theProf)
 		end
 	end
+	--[[Test]]--
+	for i,e in pairs(CraftingTool.Skills) do
+		if(CraftingTool.cLookUpProf[i].init) then
+			d("Profession: " .. i)
+			for s,k in pairs(e) do
+				d("Skill Handle: " .. s .. " Skill Name: " .. k.name) 
+			end
+			d("Buffs: " .. i)
+			for s,k in pairs(CraftingTool.Buffs[i]) do
+				d("Buff Handle: " .. s .. " ID: " .. k.id) 
+			end
+		end
+	end
+	--End Test]]--
 end
 
 function getProf(id)
@@ -195,23 +238,25 @@ function GUIUpdate()
 	
 	for i,k in pairs(CraftingTool.actionType) do
 		GUI_DeleteGroup("CraftingTool", k.."Skills")
+		GUI_NewCheckbox("CraftingTool","Use "..k,"use"..k, k.."Skills")
+		GUI_NewField("CraftingTool"," ","emptyVar", k.."Skills")
 	end
 	GUI_DeleteGroup("CraftingTool","Fix")	
-	
-	for i=0,13 do
-		local skill = CraftingTool.Skills[gCraftProf]["S"..i]
-		if(skill) then
-			local skillHandle = "S"..i
-			GUI_NewCheckbox("CraftingTool",skill.name, gCraftProf.."."..skillHandle , skill.actionType .. "Skills")
-			if(Settings.CraftingTool[gCraftProf.."."..skillHandle] == nil) then
-				Settings.CraftingTool[gCraftProf.."."..skillHandle] = "0"
-			else
-				_G[gCraftProf ..".".."S"..i] = Settings.CraftingTool[gCraftProf.."."..skillHandle]
+	d("Loading "..gCraftProf)
+	if(CraftingTool.cLookUpProf[gCraftProf]) then
+		for i,skill in pairs(CraftingTool.Skills[gCraftProf]) do
+			if(skill) then
+				GUI_NewCheckbox("CraftingTool",skill.name, gCraftProf.."."..i , skill.actionType .. "Skills")
+				if(Settings.CraftingTool[gCraftProf.."."..i] == nil) then
+					Settings.CraftingTool[gCraftProf.."."..i] = "0"
+				else
+					_G[gCraftProf .."."..i] = Settings.CraftingTool[gCraftProf.."."..i]
+				end
+				d("Name: " .. skill.name .. " Handle: " .. gCraftProf.."."..i)
 			end
-			d("Name: " .. skill.name .. " Handle: " .. gCraftProf.."."..skillHandle)
 		end
 	end
-	
+	d("Loaded "..gCraftProf)
 	for i,k in pairs(CraftingTool.actionType) do
 		GUI_UnFoldGroup("CraftingTool", k.."Skills")
 	end
@@ -252,7 +297,9 @@ function CraftingTool.Update(Event, ticks)
 				elseif(Crafting:CanCraftSelectedItem()) then
 					Crafting:CraftSelectedItem()
 					Crafting:ToggleCraftingLog()
-					CraftingTool.Buffs = {}
+					for i,k in pairs(CraftingTool.Buffs[gCraftProf]) do
+						k.length = 0
+					end
 					CraftingTool.WaitTime = 3500
 				end
 			end
@@ -281,10 +328,10 @@ function SelectStepType(synth)
 		return CraftingTool.actionType["0"] --Craft
 	elseif(durability > 10 and (description == "Excellent" or description == "Good") and useQuality == "1" and playerCP > 17) then
 		return CraftingTool.actionType["1"] --Quality
-	elseif(NeedToRecastBuffs() and useBuffs == "1") then
+	elseif(NeedToRecastBuffs() and useBuff == "1") then
 		return CraftingTool.actionType["3"] --Buffs
 	else
-		if(durability > 10 and useQuality == "1" and qualitymax - quality ~= 0) then
+		if(durability > 10 and useQuality == "1" and qualitymax - quality ~= 0 and playerCP > 17) then
 			return CraftingTool.actionType["1"] --Quality 
 		else
 			return CraftingTool.actionType["0"] --Craft
@@ -294,11 +341,12 @@ end
 
 function NeedToRecastBuffs()
 	local needtorecast = false
-	for i,k in pairs(CraftingTool.Buffs) do
+	for i,k in pairs(CraftingTool.Buffs[gCraftProf]) do
 		if(not IfPlayerHasBuff(k.id)) then
-			if(
-			needtorecast = true
-			break
+			if(_G[gCraftProf .."."..i] == "1") then
+				needtorecast = true
+				break
+			end
 		end
 	end
 	return needtorecast
@@ -366,19 +414,19 @@ end
 function IfPlayerHasBuff(buffid)
 	local buffs = Player.buffs
 	local i,e = next (buffs)
-	local exists = false
+	local haveBuff = false
 	while ( i and e ) do
 		if ( e.id == buffid ) then
-			exists = true
+			haveBuff = true
 			break
 		end
 		i,e = next (buffs,i)
 	end	
-	return exists
+	return haveBuff
 end
 
 function UseSkill(Skill)
-	for i,k in pairs(CraftingTool.Buffs) do
+	for i,k in pairs(CraftingTool.Buffs[gCraftProf]) do
 		k.length = ((k.length - 1 >= 0) and k.length - 1 or 0)
 	end
 	CraftingTool.WaitTime = 3000
