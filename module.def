@@ -1,6 +1,6 @@
 [Module]
 Name=CraftingTool
-Version=1.3
+Version=1.4
 Files=CraftingTool.lua
 dependencies=minionlib
 enabled=1
