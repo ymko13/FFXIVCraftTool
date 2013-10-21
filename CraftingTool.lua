@@ -273,7 +273,7 @@ function CraftingTool.Update(Event, ticks)
 			if(synth) then
 				itemID = synth.itemid
 				--If it's a different item then set this stuff to def and change the id of the item
-				if(prevItemId ~= synth.itemid) then
+				if(CraftingTool.prevItemId ~= synth.itemid) then
 					CraftingTool.prevItemId = synth.itemid
 					CraftingTool.ProgressGain = 0
 					CraftingTool.FirstUse = false
@@ -397,6 +397,8 @@ function SelectSkill(synth)
 									if(k.chance > 50) then bestSkill = k end
 								else
 									if(k.chance < 50) then bestSkill = k end
+								if(bestSkill == nil) then
+										bestSkill = k
 								end
 							elseif(stepType == CraftingTool.actionType["3"]) then
 								if(not IfPlayerHasBuff(k.buffid)) then
