@@ -488,7 +488,7 @@ function SelectSkill(synth)
 				--d("Pass " .. i .. " Current Best: " .. ((bestSkill == nil) and "nil" or bestSkill.name))
 				if(k) then
 					if(k.actionType == stepType) then 
-						if(k.level <= playerLevel) then
+						if(k.level <= playerLevel or string.match(i,"CC.") ~= nil) then
 							--d("Checking against " .. k.name)
 							if(stepType == CraftingTool.actionType["0"]) then
 								if(k.level == 37) then
