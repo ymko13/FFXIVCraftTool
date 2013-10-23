@@ -60,12 +60,14 @@ function CraftingTool.ModuleInit()
 	--Init Values
 	
 	gCraftProf_listitems = ""
+	d("<< Proffesions Initialised >>")
 	for i,e in pairs(CraftingTool.cLookUpProf) do
 		if(e.init) then
 			gCraftProf_listitems = gCraftProf_listitems..","..i
 		end
 		d(i .. " init: " .. tostring(e.init))
 	end
+	d("<< Proffesions End >>")
 	
 	if (Settings.CraftingTool.gCraftProf == nil) then
 		Settings.CraftingTool.gCraftProf = "WVR"
@@ -125,7 +127,7 @@ function Initialise()
              ["251"] = { ["actionType"] = CraftingTool.actionType["3"], ["chance"] = "0", ["buffid"] = "253", ["name"] = "Steady Hand", ["level"] = "9", ["cost"] = "22"  },
              ["259"] = { ["actionType"] = CraftingTool.actionType["3"], ["chance"] = "0", ["buffid"] = "251", ["name"] = "Inner Quiet", ["level"] = "11", ["cost"] = "18"  },
              ["100113"] = { ["actionType"] = CraftingTool.actionType["4"], ["chance"] = "100", ["buffid"] = "0", ["name"] = "Observe", ["level"] = "13", ["cost"] = "14"  },
-             ["100108"] = { ["actionType"] = CraftingTool.actionType["0"], ["chance"] = "50", ["buffid"] = "0", ["name"] = "Hasty Touch", ["level"] = "15", ["cost"] = "0"  },
+             ["100108"] = { ["actionType"] = CraftingTool.actionType["1"], ["chance"] = "50", ["buffid"] = "0", ["name"] = "Hasty Touch", ["level"] = "15", ["cost"] = "0"  },
              ["100109"] = { ["actionType"] = CraftingTool.actionType["1"], ["chance"] = "80", ["buffid"] = "0", ["name"] = "Standard Touch", ["level"] = "18", ["cost"] = "32"  },
              ["267"] = { ["actionType"] = CraftingTool.actionType["3"], ["chance"] = "90", ["buffid"] = "254", ["name"] = "Great Strides", ["level"] = "21", ["cost"] = "32"  },
              ["100110"] = { ["actionType"] = CraftingTool.actionType["2"], ["chance"] = "60", ["buffid"] = "0", ["name"] = "Master's Mend II", ["level"] = "25", ["cost"] = "160"  },
@@ -134,7 +136,7 @@ function Initialise()
              ["100112"] = { ["actionType"] = CraftingTool.actionType["1"], ["chance"] = "90", ["buffid"] = "0", ["name"] = "Advanced Touch", ["level"] = "43", ["cost"] = "48"  },
              ["287"] = { ["actionType"] = CraftingTool.actionType["3"], ["chance"] = "0", ["buffid"] = "260", ["name"] = "Reclaim", ["level"] = "50", ["cost"] = "55"  }
          },
-		 ["ALC"] = {
+		["ALC"] = {
             ["100090"] = { ["actionType"] = CraftingTool.actionType["0"], ["chance"] = "90", ["buffid"] = "0", ["name"] = "Basic Synthesis", ["level"] = "1", ["cost"] = "0" },
             ["100091"] = { ["actionType"] = CraftingTool.actionType["1"], ["chance"] = "70", ["buffid"] = "0", ["name"] = "Basic Touch", ["level"] = "5", ["cost"] = "18"  },
             ["100092"] = { ["actionType"] = CraftingTool.actionType["2"], ["chance"] = "30", ["buffid"] = "0", ["name"] = "Master's Mend", ["level"] = "7", ["cost"] = "92"  },
@@ -197,13 +199,47 @@ function Initialise()
             ["100083"] = { ["actionType"] = CraftingTool.actionType["0"], ["chance"] = "90", ["buffid"] = "0", ["name"] = "Flawless Synthesis", ["level"] = "37", ["cost"] = "15"  },
             ["100081"] = { ["actionType"] = CraftingTool.actionType["1"], ["chance"] = "90", ["buffid"] = "0", ["name"] = "Advanced Touch", ["level"] = "43", ["cost"] = "48"  },
             ["284"] = { ["actionType"] = CraftingTool.actionType["3"], ["chance"] = "0", ["buffid"] = "259", ["name"] = "Innovation", ["level"] = "50", ["cost"] = "18"  }
+        },
+		["LTW"] = {
+            ["100045"] = { ["actionType"] = CraftingTool.actionType["0"], ["chance"] = "90", ["buffid"] = "0", ["name"] = "Basic Synthesis", ["level"] = "1", ["cost"] = "0" },
+            ["100046"] = { ["actionType"] = CraftingTool.actionType["1"], ["chance"] = "70", ["buffid"] = "0", ["name"] = "Basic Touch", ["level"] = "5", ["cost"] = "18"  },
+            ["100047"] = { ["actionType"] = CraftingTool.actionType["2"], ["chance"] = "30", ["buffid"] = "0", ["name"] = "Master's Mend", ["level"] = "7", ["cost"] = "92"  },
+            ["249"] = { ["actionType"] = CraftingTool.actionType["3"], ["chance"] = "0", ["buffid"] = "253", ["name"] = "Steady Hand", ["level"] = "9", ["cost"] = "22"  },
+            ["257"] = { ["actionType"] = CraftingTool.actionType["3"], ["chance"] = "0", ["buffid"] = "251", ["name"] = "Inner-Quiet", ["level"] = "11", ["cost"] = "18"  },
+            ["100053"] = { ["actionType"] = CraftingTool.actionType["4"], ["chance"] = "100", ["buffid"] = "0", ["name"] = "Observe", ["level"] = "13", ["cost"] = "14"  },
+            ["279"] = { ["actionType"] = CraftingTool.actionType["3"], ["chance"] = "100", ["buffid"] = "252", ["name"] = "Waste Not", ["level"] = "15", ["cost"] = "56"  },
+            ["100048"] = { ["actionType"] = CraftingTool.actionType["1"], ["chance"] = "80", ["buffid"] = "0", ["name"] = "Standard Touch", ["level"] = "18", ["cost"] = "32"  },
+            ["265"] = { ["actionType"] = CraftingTool.actionType["3"], ["chance"] = "90", ["buffid"] = "254", ["name"] = "Great Strides", ["level"] = "21", ["cost"] = "32"  },
+            ["100049"] = { ["actionType"] = CraftingTool.actionType["2"], ["chance"] = "60", ["buffid"] = "0", ["name"] = "Master's Mend II", ["level"] = "25", ["cost"] = "160"  },
+            ["100051"] = { ["actionType"] = CraftingTool.actionType["0"], ["chance"] = "90", ["buffid"] = "0", ["name"] = "Standard Synthesis", ["level"] = "31", ["cost"] = "15"  },
+            ["100050"] = { ["actionType"] = CraftingTool.actionType["0"], ["chance"] = "90", ["buffid"] = "0", ["name"] = "Brand Of Earth", ["level"] = "37", ["cost"] = "15"  },
+            ["100052"] = { ["actionType"] = CraftingTool.actionType["1"], ["chance"] = "90", ["buffid"] = "0", ["name"] = "Advanced Touch", ["level"] = "43", ["cost"] = "48"  },
+            ["285"] = { ["actionType"] = CraftingTool.actionType["3"], ["chance"] = "90", ["buffid"] = "257", ["name"] = "Waste Not II", ["level"] = "50", ["cost"] = "98"  }
+        },
+		["CRP"] = {
+            ["100001"] = { ["actionType"] = CraftingTool.actionType["0"], ["chance"] = "90", ["buffid"] = "0", ["name"] = "Basic Synthesis", ["level"] = "1", ["cost"] = "0" },
+            ["100002"] = { ["actionType"] = CraftingTool.actionType["1"], ["chance"] = "70", ["buffid"] = "0", ["name"] = "Basic Touch", ["level"] = "5", ["cost"] = "18"  },
+            ["100003"] = { ["actionType"] = CraftingTool.actionType["2"], ["chance"] = "30", ["buffid"] = "0", ["name"] = "Master's Mend", ["level"] = "7", ["cost"] = "92"  },
+            ["244"] = { ["actionType"] = CraftingTool.actionType["3"], ["chance"] = "0", ["buffid"] = "253", ["name"] = "Steady Hand", ["level"] = "9", ["cost"] = "22"  },
+            ["252"] = { ["actionType"] = CraftingTool.actionType["3"], ["chance"] = "0", ["buffid"] = "251", ["name"] = "Inner-Quiet", ["level"] = "11", ["cost"] = "18"  },
+            ["100010"] = { ["actionType"] = CraftingTool.actionType["4"], ["chance"] = "100", ["buffid"] = "0", ["name"] = "Observe", ["level"] = "13", ["cost"] = "14"  },
+            ["276"] = { ["actionType"] = CraftingTool.actionType["3"], ["chance"] = "100", ["buffid"] = "276", ["name"] = "Rumination", ["level"] = "15", ["cost"] = "0"  },
+            ["100004"] = { ["actionType"] = CraftingTool.actionType["1"], ["chance"] = "80", ["buffid"] = "0", ["name"] = "Standard Touch", ["level"] = "18", ["cost"] = "32"  },
+            ["260"] = { ["actionType"] = CraftingTool.actionType["3"], ["chance"] = "90", ["buffid"] = "254", ["name"] = "Great Strides", ["level"] = "21", ["cost"] = "32"  },
+            ["100005"] = { ["actionType"] = CraftingTool.actionType["2"], ["chance"] = "60", ["buffid"] = "0", ["name"] = "Master's Mend II", ["level"] = "25", ["cost"] = "160"  },
+            ["100007"] = { ["actionType"] = CraftingTool.actionType["0"], ["chance"] = "90", ["buffid"] = "0", ["name"] = "Standard Synthesis", ["level"] = "31", ["cost"] = "15"  },
+            ["100006"] = { ["actionType"] = CraftingTool.actionType["0"], ["chance"] = "90", ["buffid"] = "0", ["name"] = "Brand Of Wind", ["level"] = "37", ["cost"] = "15"  },
+            ["100008"] = { ["actionType"] = CraftingTool.actionType["1"], ["chance"] = "90", ["buffid"] = "0", ["name"] = "Advanced Touch", ["level"] = "43", ["cost"] = "48"  },
+            ["100009"] = { ["actionType"] = CraftingTool.actionType["1"], ["chance"] = "90", ["buffid"] = "0", ["name"] = "Byregot's Blessing", ["level"] = "50", ["cost"] = "24"  }
         }
 	}
+	
 	for z=8,15 do
 		local skilllist = ActionList("type=1,job="..z)
 		local theProf = getProf(z)
 		CraftingTool.Skills[theProf] = {}
 		CraftingTool.Buffs[theProf] = {}
+		d("<< Trying to init " .. theProf .. " >>")
 		local index = 0
 		if(localLookUp[theProf]) then
 			local i,e = next (localLookUp[theProf])
@@ -235,24 +271,24 @@ function Initialise()
 					["buffid"] = tonumber(e.buffid)
 					}
 				end
-				d( sName .. " -> " .. " ID: " .. i .. " Name:" .. e.name .. " Cost:" .. e.cost .. " Level:" .. e.level .. " Type:" .. e.actionType .. " Chance:" .. e.chance .. " BuffID:" .. e.buffid .. " -> F:" .. tostring(found))
+				d("SKILL => " .. sName .. " -> " .. " ID: " .. i .. " Name:" .. e.name .. " Cost:" .. e.cost .. " Level:" .. e.level .. " Type:" .. e.actionType .. " Chance:" .. e.chance .. " BuffID:" .. e.buffid .. " -> F:" .. tostring(found))
 				
 				if(e.actionType == CraftingTool.actionType["3"]) then
-					d("IN => " .. e.buffid .. " 0")
 					CraftingTool.Buffs[theProf][sName] = { ["id"] = tonumber(e.buffid), ["length"] = 0 }
-					d("OUT => " .. CraftingTool.Buffs[theProf][sName].id .. " " .. CraftingTool.Buffs[theProf][sName].length)
+					d("BUFF => " .. CraftingTool.Buffs[theProf][sName].id .. " " .. CraftingTool.Buffs[theProf][sName].length)
 				end
 				
 				index = index + 1
 				i,e = next (localLookUp[theProf],i)
 			end
-			d("Initialised the " .. theProf .. " profession")
+			d("<< " .. theProf ..  " init successfully >>")
 			CraftingTool.cLookUpProf[theProf].init = true
 		else
 			d("No skill list found for " .. theProf)
+			d("<< ".. theProf .. " init failed >>")
 		end
 	end
-	--[[Test]]--
+	--[[Test--
 	for i,e in pairs(CraftingTool.Skills) do
 		if(CraftingTool.cLookUpProf[i].init) then
 			d("Profession: " .. i)
@@ -269,16 +305,7 @@ function Initialise()
 end
 
 function getProf(id)
-	local localLookUp = {
-		["8"] = "CRP",
-		["9"] = "BSM",
-		["10"] = "ARM",
-		["11"] = "GSM",
-		["12"] = "LTW",
-		["13"] = "WVR",
-		["14"] = "ALC",
-		["15"] = "CUL"
-	}
+	local localLookUp = {["8"] = "CRP",["9"] = "BSM",["10"] = "ARM",["11"] = "GSM",["12"] = "LTW",["13"] = "WVR",["14"] = "ALC",["15"] = "CUL"}
 	return localLookUp[tostring(id)]
 end
 
@@ -306,7 +333,7 @@ function GUIUpdate()
 		GUI_NewField("CraftingTool"," ","emptyVar", k.."Skills")
 	end
 	GUI_DeleteGroup("CraftingTool","Fix")	
-	d("Loading "..gCraftProf)
+	d("<< Trying to load "..gCraftProf.." >>")
 	if(CraftingTool.cLookUpProf[gCraftProf]) then
 		for i,skill in pairs(CraftingTool.Skills[gCraftProf]) do
 			if(skill) then
@@ -316,11 +343,11 @@ function GUIUpdate()
 				else
 					_G[gCraftProf .."."..i] = Settings.CraftingTool[gCraftProf.."."..i]
 				end
-				d("Name: " .. skill.name .. " Handle: " .. gCraftProf.."."..i)
+				d("Name: " .. skill.name) -- .. " Handle: " .. gCraftProf.."."..i)
 			end
 		end
 	end
-	d("Loaded "..gCraftProf)
+	d("<< Loaded "..gCraftProf.." >>")
 	for i,k in pairs(CraftingTool.actionType) do
 		GUI_UnFoldGroup("CraftingTool", k.."Skills")
 	end
@@ -359,6 +386,7 @@ function CraftingTool.Update(Event, ticks)
 				if (not Crafting:IsCraftingLogOpen()) then
 					Crafting:ToggleCraftingLog()
 				elseif(Crafting:CanCraftSelectedItem()) then
+					d("<< Crafting Item >>")
 					Crafting:CraftSelectedItem()
 					Crafting:ToggleCraftingLog()
 					for i,k in pairs(CraftingTool.Buffs[gCraftProf]) do
@@ -461,6 +489,7 @@ function SelectSkill(synth)
 									if(k.chance > 50) then bestSkill = k end
 								else
 									if(k.chance < 50) then bestSkill = k end
+								end
 								if(bestSkill == nil) then
 										bestSkill = k
 								end
@@ -475,7 +504,7 @@ function SelectSkill(synth)
 			end
 		end
 	end
-	d(stepType .. " " .. bestSkill.name)
+	d("STEP=>" .. stepType .. " SKILL=>" .. bestSkill.name)
 	return bestSkill
 end
 
