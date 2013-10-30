@@ -11,6 +11,7 @@ CraftingTool.prevItemId = 0
 CraftingTool.ProgressGain = 0
 CraftingTool.QualityGain = 0
 CraftingTool.RecipeLevel = 0
+CraftingTool.InnerQuietStacks = 0
 
 CraftingTool.FirstUse = false
 CraftingTool.FirstUseLevel = 0
@@ -35,6 +36,14 @@ CraftingTool.actionType = { --Next Action
 	["4"] = "Skip"
 }
 
+CraftingTool.TypeBlacklist = { --Skip true for next action
+	["Progress"] = false,
+	["Quality"] = false,
+	["Durability"] = false,
+	["Buff"] = false,
+	["Skip"] = false
+}
+
 CraftingTool.Skills = { } --Made Runtime
 CraftingTool.Buffs = {} --Made Runtime
 
@@ -49,6 +58,7 @@ function CraftingTool.ModuleInit()
 	GUI_NewField("CraftingTool","Item Level","itemLevel", "Crafting")
 	GUI_NewField("CraftingTool","Craftsmanship","craftsmanship", "Crafting")
 	GUI_NewField("CraftingTool","Control","control", "Crafting")
+	GUI_NewField("CraftingTool","Efficiency","baseEfficiency", "Crafting")
 	GUI_NewField("CraftingTool","Steps To Finish","stepsLeft", "Crafting")
 	GUI_NewField("CraftingTool","Last Skill Used","lSkill", "Crafting")
 	GUI_NewField("CraftingTool","Crafting","cCraft", "Crafting")
@@ -111,134 +121,139 @@ end
 function Initialise()
 	local localLookUp = {
 		["WVR"] = {
-			["100060"] = { ["actionType"] = CraftingTool.actionType["0"], ["efficiency"] = "100", ["chance"] = "90", ["buffid"] = "0", ["name"] = "Basic Synthesis", ["level"] = "1", ["cost"] = "0", ["CC"]=false },
-			["100061"] = { ["actionType"] = CraftingTool.actionType["1"], ["efficiency"] = "100", ["chance"] = "70", ["buffid"] = "0", ["name"] = "Basic Touch", ["level"] = "5", ["cost"] = "18", ["CC"]=false },
-			["100062"] = { ["actionType"] = CraftingTool.actionType["2"], ["efficiency"] = "30", ["chance"] = "30", ["buffid"] = "0", ["name"] = "Master's Mend", ["level"] = "7", ["cost"] = "92", ["CC"]=false },
-			["248"] = { ["actionType"] = CraftingTool.actionType["3"], ["efficiency"] = "0", ["chance"] = "0", ["buffid"] = "253", ["name"] = "Steady Hand", ["level"] = "9", ["cost"] = "22", ["CC"]=false },
-			["256"] = { ["actionType"] = CraftingTool.actionType["3"], ["efficiency"] = "0", ["chance"] = "0", ["buffid"] = "251", ["name"] = "Inner Quiet", ["level"] = "11", ["cost"] = "18", ["CC"]=false },
-			["100070"] = { ["actionType"] = CraftingTool.actionType["4"], ["efficiency"] = "1", ["chance"] = "100", ["buffid"] = "0", ["name"] = "Observe", ["level"] = "13", ["cost"] = "14", ["CC"]=false },
-			["100063"] = { ["actionType"] = CraftingTool.actionType["0"], ["efficiency"] = "90", ["chance"] = "100", ["buffid"] = "0", ["name"] = "Careful Synthesis", ["level"] = "15", ["cost"] = "0", ["CC"]=true },
-			["100064"] = { ["actionType"] = CraftingTool.actionType["1"], ["efficiency"] = "125", ["chance"] = "70", ["buffid"] = "0", ["name"] = "Standard Touch", ["level"] = "18", ["cost"] = "32", ["CC"]=false },
-			["264"] = { ["actionType"] = CraftingTool.actionType["3"], ["efficiency"] = "200", ["chance"] = "0", ["buffid"] = "254", ["name"] = "Great Strides", ["level"] = "21", ["cost"] = "32", ["CC"]=false },
-			["100065"] = { ["actionType"] = CraftingTool.actionType["2"], ["efficiency"] = "60", ["chance"] = "60", ["buffid"] = "0", ["name"] = "Master's Mend II", ["level"] = "25", ["cost"] = "160", ["CC"]=false },
-			["100067"] = { ["actionType"] = CraftingTool.actionType["0"], ["efficiency"] = "150", ["chance"] = "90", ["buffid"] = "0", ["name"] = "Standard Synthesis", ["level"] = "31", ["cost"] = "15", ["CC"]=false },
-			["100066"] = { ["actionType"] = CraftingTool.actionType["0"], ["efficiency"] = "200", ["chance"] = "90", ["buffid"] = "0", ["name"] = "Brand of Lightning", ["level"] = "37", ["cost"] = "15", ["CC"]=false },
-			["100068"] = { ["actionType"] = CraftingTool.actionType["1"], ["efficiency"] = "150", ["chance"] = "90", ["buffid"] = "0", ["name"] = "Advanced Touch", ["level"] = "43", ["cost"] = "48", ["CC"]=false },
-			["100069"] = { ["actionType"] = CraftingTool.actionType["0"], ["efficiency"] = "120", ["chance"] = "100", ["buffid"] = "0", ["name"] = "Careful Synthesis II", ["level"] = "50", ["cost"] = "0", ["CC"]=true  }
+			["100060"] = { ["actionType"] = CraftingTool.actionType["0"], ["efficiency"] = "100", ["chance"] = "90", ["buffid"] = "0", ["name"] = "Basic Synthesis", ["level"] = "1", ["cost"] = "0", ["length"] = "0", ["CC"]=false },
+			["100061"] = { ["actionType"] = CraftingTool.actionType["1"], ["efficiency"] = "100", ["chance"] = "70", ["buffid"] = "0", ["name"] = "Basic Touch", ["level"] = "5", ["cost"] = "18", ["length"] = "0", ["CC"]=false },
+			["100062"] = { ["actionType"] = CraftingTool.actionType["2"], ["efficiency"] = "30", ["chance"] = "30", ["buffid"] = "0", ["name"] = "Master's Mend", ["level"] = "7", ["cost"] = "92", ["length"] = "0", ["CC"]=false },
+			["248"] = { ["actionType"] = CraftingTool.actionType["3"], ["efficiency"] = "0", ["chance"] = "0", ["buffid"] = "253", ["name"] = "Steady Hand", ["level"] = "9", ["cost"] = "22", ["length"] = "5", ["CC"]=false },
+			["256"] = { ["actionType"] = CraftingTool.actionType["3"], ["efficiency"] = "0", ["chance"] = "0", ["buffid"] = "251", ["name"] = "Inner Quiet", ["level"] = "11", ["cost"] = "18", ["length"] = "0", ["CC"]=false },
+			["100070"] = { ["actionType"] = CraftingTool.actionType["4"], ["efficiency"] = "1", ["chance"] = "100", ["buffid"] = "0", ["name"] = "Observe", ["level"] = "13", ["cost"] = "14", ["length"] = "0", ["CC"]=false },
+			["100063"] = { ["actionType"] = CraftingTool.actionType["0"], ["efficiency"] = "90", ["chance"] = "100", ["buffid"] = "0", ["name"] = "Careful Synthesis", ["level"] = "15", ["cost"] = "0", ["length"] = "0", ["CC"]=true },
+			["100064"] = { ["actionType"] = CraftingTool.actionType["1"], ["efficiency"] = "125", ["chance"] = "70", ["buffid"] = "0", ["name"] = "Standard Touch", ["level"] = "18", ["cost"] = "32", ["length"] = "0", ["CC"]=false },
+			["264"] = { ["actionType"] = CraftingTool.actionType["3"], ["efficiency"] = "200", ["chance"] = "0", ["buffid"] = "254", ["name"] = "Great Strides", ["level"] = "21", ["cost"] = "32", ["length"] = "3", ["CC"]=false },
+			["100065"] = { ["actionType"] = CraftingTool.actionType["2"], ["efficiency"] = "60", ["chance"] = "60", ["buffid"] = "0", ["name"] = "Master's Mend II", ["level"] = "25", ["cost"] = "160", ["length"] = "0", ["CC"]=false },
+			["100067"] = { ["actionType"] = CraftingTool.actionType["0"], ["efficiency"] = "150", ["chance"] = "90", ["buffid"] = "0", ["name"] = "Standard Synthesis", ["level"] = "31", ["cost"] = "15", ["length"] = "0", ["CC"]=false },
+			["100066"] = { ["actionType"] = CraftingTool.actionType["0"], ["efficiency"] = "200", ["chance"] = "90", ["buffid"] = "0", ["name"] = "Brand of Lightning", ["level"] = "37", ["cost"] = "15", ["length"] = "0", ["CC"]=false },
+			["100068"] = { ["actionType"] = CraftingTool.actionType["1"], ["efficiency"] = "150", ["chance"] = "90", ["buffid"] = "0", ["name"] = "Advanced Touch", ["level"] = "43", ["cost"] = "48", ["length"] = "0", ["CC"]=false },
+			["100069"] = { ["actionType"] = CraftingTool.actionType["0"], ["efficiency"] = "120", ["chance"] = "100", ["buffid"] = "0", ["name"] = "Careful Synthesis II", ["level"] = "50", ["cost"] = "0", ["length"] = "0", ["CC"]=true  }
 		},
 		["CUL"] = {
-             ["100105"] = { ["actionType"] = CraftingTool.actionType["0"], ["efficiency"] = "100", ["chance"] = "90", ["buffid"] = "0", ["name"] = "Basic Synthesis", ["level"] = "1", ["cost"] = "0", ["CC"]=false },
-             ["100106"] = { ["actionType"] = CraftingTool.actionType["1"], ["efficiency"] = "100", ["chance"] = "70", ["buffid"] = "0", ["name"] = "Basic Touch", ["level"] = "5", ["cost"] = "18", ["CC"]=false },
-             ["100107"] = { ["actionType"] = CraftingTool.actionType["2"], ["efficiency"] = "30", ["chance"] = "30", ["buffid"] = "0", ["name"] = "Master's Mend", ["level"] = "7", ["cost"] = "92", ["CC"]=false },
-             ["251"] = { ["actionType"] = CraftingTool.actionType["3"], ["efficiency"] = "0", ["chance"] = "0", ["buffid"] = "253", ["name"] = "Steady Hand", ["level"] = "9", ["cost"] = "22", ["CC"]=false },
-             ["259"] = { ["actionType"] = CraftingTool.actionType["3"], ["efficiency"] = "0", ["chance"] = "0", ["buffid"] = "251", ["name"] = "Inner Quiet", ["level"] = "11", ["cost"] = "18", ["CC"]=false },
-             ["100113"] = { ["actionType"] = CraftingTool.actionType["4"], ["efficiency"] = "1", ["chance"] = "100", ["buffid"] = "0", ["name"] = "Observe", ["level"] = "13", ["cost"] = "14", ["CC"]=false },
-             ["100108"] = { ["actionType"] = CraftingTool.actionType["1"], ["efficiency"] = "100", ["chance"] = "50", ["buffid"] = "0", ["name"] = "Hasty Touch", ["level"] = "15", ["cost"] = "0", ["CC"]=true },
-             ["100109"] = { ["actionType"] = CraftingTool.actionType["1"], ["efficiency"] = "125", ["chance"] = "80", ["buffid"] = "0", ["name"] = "Standard Touch", ["level"] = "18", ["cost"] = "32", ["CC"]=false },
-             ["267"] = { ["actionType"] = CraftingTool.actionType["3"], ["efficiency"] = "200", ["chance"] = "0", ["buffid"] = "254", ["name"] = "Great Strides", ["level"] = "21", ["cost"] = "32", ["CC"]=false },
-             ["100110"] = { ["actionType"] = CraftingTool.actionType["2"], ["efficiency"] = "60", ["chance"] = "60", ["buffid"] = "0", ["name"] = "Master's Mend II", ["level"] = "25", ["cost"] = "160", ["CC"]=false },
-             ["100111"] = { ["actionType"] = CraftingTool.actionType["0"], ["efficiency"] = "150", ["chance"] = "90", ["buffid"] = "0", ["name"] = "Standard Synthesis", ["level"] = "31", ["cost"] = "15", ["CC"]=false },
-             ["281"] = { ["actionType"] = CraftingTool.actionType["3"], ["efficiency"] = "0", ["chance"] = "0", ["buffid"] = "262", ["name"] = "Steady Hand II", ["level"] = "37", ["cost"] = "25", ["CC"]=true },
-             ["100112"] = { ["actionType"] = CraftingTool.actionType["1"], ["efficiency"] = "150", ["chance"] = "90", ["buffid"] = "0", ["name"] = "Advanced Touch", ["level"] = "43", ["cost"] = "48", ["CC"]=false },
-             ["287"] = { ["actionType"] = CraftingTool.actionType["3"], ["efficiency"] = "0", ["chance"] = "90", ["buffid"] = "260", ["name"] = "Reclaim", ["level"] = "50", ["cost"] = "55", ["CC"]=true  }
+             ["100105"] = { ["actionType"] = CraftingTool.actionType["0"], ["efficiency"] = "100", ["chance"] = "90", ["buffid"] = "0", ["name"] = "Basic Synthesis", ["level"] = "1", ["cost"] = "0", ["length"] = "0", ["CC"]=false },
+             ["100106"] = { ["actionType"] = CraftingTool.actionType["1"], ["efficiency"] = "100", ["chance"] = "70", ["buffid"] = "0", ["name"] = "Basic Touch", ["level"] = "5", ["cost"] = "18", ["length"] = "0", ["CC"]=false },
+             ["100107"] = { ["actionType"] = CraftingTool.actionType["2"], ["efficiency"] = "30", ["chance"] = "30", ["buffid"] = "0", ["name"] = "Master's Mend", ["level"] = "7", ["cost"] = "92", ["length"] = "0", ["CC"]=false },
+             ["251"] = { ["actionType"] = CraftingTool.actionType["3"], ["efficiency"] = "0", ["chance"] = "0", ["buffid"] = "253", ["name"] = "Steady Hand", ["level"] = "9", ["cost"] = "22", ["length"] = "5", ["CC"]=false },
+             ["259"] = { ["actionType"] = CraftingTool.actionType["3"], ["efficiency"] = "0", ["chance"] = "0", ["buffid"] = "251", ["name"] = "Inner Quiet", ["level"] = "11", ["cost"] = "18", ["length"] = "0", ["CC"]=false },
+             ["100113"] = { ["actionType"] = CraftingTool.actionType["4"], ["efficiency"] = "1", ["chance"] = "100", ["buffid"] = "0", ["name"] = "Observe", ["level"] = "13", ["cost"] = "14", ["length"] = "0", ["CC"]=false },
+             ["100108"] = { ["actionType"] = CraftingTool.actionType["1"], ["efficiency"] = "100", ["chance"] = "50", ["buffid"] = "0", ["name"] = "Hasty Touch", ["level"] = "15", ["cost"] = "0", ["length"] = "0", ["CC"]=true },
+             ["100109"] = { ["actionType"] = CraftingTool.actionType["1"], ["efficiency"] = "125", ["chance"] = "80", ["buffid"] = "0", ["name"] = "Standard Touch", ["level"] = "18", ["cost"] = "32", ["length"] = "0", ["CC"]=false },
+             ["267"] = { ["actionType"] = CraftingTool.actionType["3"], ["efficiency"] = "200", ["chance"] = "0", ["buffid"] = "254", ["name"] = "Great Strides", ["level"] = "21", ["cost"] = "32", ["length"] = "3", ["CC"]=false },
+             ["100110"] = { ["actionType"] = CraftingTool.actionType["2"], ["efficiency"] = "60", ["chance"] = "60", ["buffid"] = "0", ["name"] = "Master's Mend II", ["level"] = "25", ["cost"] = "160", ["length"] = "0", ["CC"]=false },
+             ["100111"] = { ["actionType"] = CraftingTool.actionType["0"], ["efficiency"] = "150", ["chance"] = "90", ["buffid"] = "0", ["name"] = "Standard Synthesis", ["level"] = "31", ["cost"] = "15", ["length"] = "0", ["CC"]=false },
+             ["281"] = { ["actionType"] = CraftingTool.actionType["3"], ["efficiency"] = "0", ["chance"] = "0", ["buffid"] = "262", ["name"] = "Steady Hand II", ["level"] = "37", ["cost"] = "25", ["length"] = "5", ["CC"]=true },
+             ["100112"] = { ["actionType"] = CraftingTool.actionType["1"], ["efficiency"] = "150", ["chance"] = "90", ["buffid"] = "0", ["name"] = "Advanced Touch", ["level"] = "43", ["cost"] = "48", ["length"] = "0", ["CC"]=false },
+             ["287"] = { ["actionType"] = CraftingTool.actionType["3"], ["efficiency"] = "0", ["chance"] = "90", ["buffid"] = "260", ["name"] = "Reclaim", ["level"] = "50", ["cost"] = "55", ["length"] = "0", ["CC"]=true  }
          },
 		["ALC"] = {
-            ["100090"] = { ["actionType"] = CraftingTool.actionType["0"], ["efficiency"] = "100", ["chance"] = "90", ["buffid"] = "0", ["name"] = "Basic Synthesis", ["level"] = "1", ["cost"] = "0", ["CC"]=false },
-            ["100091"] = { ["actionType"] = CraftingTool.actionType["1"], ["efficiency"] = "100", ["chance"] = "70", ["buffid"] = "0", ["name"] = "Basic Touch", ["level"] = "5", ["cost"] = "18", ["CC"]=false },
-            ["100092"] = { ["actionType"] = CraftingTool.actionType["2"], ["efficiency"] = "30", ["chance"] = "30", ["buffid"] = "0", ["name"] = "Master's Mend", ["level"] = "7", ["cost"] = "92", ["CC"]=false },
-            ["250"] = { ["actionType"] = CraftingTool.actionType["3"], ["efficiency"] = "0", ["chance"] = "0", ["buffid"] = "253", ["name"] = "Steady Hand", ["level"] = "9", ["cost"] = "22", ["CC"]=false },
-            ["258"] = { ["actionType"] = CraftingTool.actionType["3"], ["efficiency"] = "0", ["chance"] = "0", ["buffid"] = "251", ["name"] = "Inner Quiet", ["level"] = "11", ["cost"] = "18", ["CC"]=false },
-            ["100099"] = { ["actionType"] = CraftingTool.actionType["4"], ["efficiency"] = "1", ["chance"] = "100", ["buffid"] = "0", ["name"] = "Observe", ["level"] = "13", ["cost"] = "14", ["CC"]=false },
-            ["100098"] = { ["actionType"] = CraftingTool.actionType["4"], ["efficiency"] = "20", ["chance"] = "100", ["buffid"] = "0", ["name"] = "Tricks Of The Trade", ["level"] = "15", ["cost"] = "0", ["CC"]=true },
-            ["100093"] = { ["actionType"] = CraftingTool.actionType["1"], ["efficiency"] = "125", ["chance"] = "80", ["buffid"] = "0", ["name"] = "Standard Touch", ["level"] = "18", ["cost"] = "32", ["CC"]=false },
-            ["266"] = { ["actionType"] = CraftingTool.actionType["3"], ["efficiency"] = "200", ["chance"] = "0", ["buffid"] = "254", ["name"] = "Great Strides", ["level"] = "21", ["cost"] = "0", ["CC"]=false },
-            ["100094"] = { ["actionType"] = CraftingTool.actionType["2"], ["efficiency"] = "60", ["chance"] = "60", ["buffid"] = "0", ["name"] = "Master's Mend II", ["level"] = "25", ["cost"] = "160", ["CC"]=false },
-            ["100096"] = { ["actionType"] = CraftingTool.actionType["0"], ["efficiency"] = "150", ["chance"] = "90", ["buffid"] = "0", ["name"] = "Standard Synthesis", ["level"] = "31", ["cost"] = "15", ["CC"]=false },
-            ["100095"] = { ["actionType"] = CraftingTool.actionType["0"], ["efficiency"] = "200", ["chance"] = "90", ["buffid"] = "0", ["name"] = "Brand of Water", ["level"] = "37", ["cost"] = "15", ["CC"]=false },
-            ["100097"] = { ["actionType"] = CraftingTool.actionType["1"], ["efficiency"] = "150", ["chance"] = "90", ["buffid"] = "0", ["name"] = "Advanced Touch", ["level"] = "43", ["cost"] = "48", ["CC"]=false },
-            ["286"] = { ["actionType"] = CraftingTool.actionType["3"], ["efficiency"] = "0", ["chance"] = "0", ["buffid"] = "261", ["name"] = "Comfort Zone", ["level"] = "50", ["cost"] = "66", ["CC"]=true  }
+            ["100090"] = { ["actionType"] = CraftingTool.actionType["0"], ["efficiency"] = "100", ["chance"] = "90", ["buffid"] = "0", ["name"] = "Basic Synthesis", ["level"] = "1", ["cost"] = "0", ["length"] = "0", ["CC"]=false },
+            ["100091"] = { ["actionType"] = CraftingTool.actionType["1"], ["efficiency"] = "100", ["chance"] = "70", ["buffid"] = "0", ["name"] = "Basic Touch", ["level"] = "5", ["cost"] = "18", ["length"] = "0", ["CC"]=false },
+            ["100092"] = { ["actionType"] = CraftingTool.actionType["2"], ["efficiency"] = "30", ["chance"] = "30", ["buffid"] = "0", ["name"] = "Master's Mend", ["level"] = "7", ["cost"] = "92", ["length"] = "0", ["CC"]=false },
+            ["250"] = { ["actionType"] = CraftingTool.actionType["3"], ["efficiency"] = "0", ["chance"] = "0", ["buffid"] = "253", ["name"] = "Steady Hand", ["level"] = "9", ["cost"] = "22", ["length"] = "5", ["CC"]=false },
+            ["258"] = { ["actionType"] = CraftingTool.actionType["3"], ["efficiency"] = "0", ["chance"] = "0", ["buffid"] = "251", ["name"] = "Inner Quiet", ["level"] = "11", ["cost"] = "18", ["length"] = "0", ["CC"]=false },
+            ["100099"] = { ["actionType"] = CraftingTool.actionType["4"], ["efficiency"] = "1", ["chance"] = "100", ["buffid"] = "0", ["name"] = "Observe", ["level"] = "13", ["cost"] = "14", ["length"] = "0", ["CC"]=false },
+            ["100098"] = { ["actionType"] = CraftingTool.actionType["4"], ["efficiency"] = "20", ["chance"] = "100", ["buffid"] = "0", ["name"] = "Tricks Of The Trade", ["level"] = "15", ["cost"] = "0", ["length"] = "0", ["CC"]=true },
+            ["100093"] = { ["actionType"] = CraftingTool.actionType["1"], ["efficiency"] = "125", ["chance"] = "80", ["buffid"] = "0", ["name"] = "Standard Touch", ["level"] = "18", ["cost"] = "32", ["length"] = "0", ["CC"]=false },
+            ["266"] = { ["actionType"] = CraftingTool.actionType["3"], ["efficiency"] = "200", ["chance"] = "0", ["buffid"] = "254", ["name"] = "Great Strides", ["level"] = "21", ["cost"] = "0", ["length"] = "3", ["CC"]=false },
+            ["100094"] = { ["actionType"] = CraftingTool.actionType["2"], ["efficiency"] = "60", ["chance"] = "60", ["buffid"] = "0", ["name"] = "Master's Mend II", ["level"] = "25", ["cost"] = "160", ["length"] = "0", ["CC"]=false },
+            ["100096"] = { ["actionType"] = CraftingTool.actionType["0"], ["efficiency"] = "150", ["chance"] = "90", ["buffid"] = "0", ["name"] = "Standard Synthesis", ["level"] = "31", ["cost"] = "15", ["length"] = "0", ["CC"]=false },
+            ["100095"] = { ["actionType"] = CraftingTool.actionType["0"], ["efficiency"] = "200", ["chance"] = "90", ["buffid"] = "0", ["name"] = "Brand of Water", ["level"] = "37", ["cost"] = "15", ["length"] = "0", ["CC"]=false },
+            ["100097"] = { ["actionType"] = CraftingTool.actionType["1"], ["efficiency"] = "150", ["chance"] = "90", ["buffid"] = "0", ["name"] = "Advanced Touch", ["level"] = "43", ["cost"] = "48", ["length"] = "0", ["CC"]=false },
+            ["286"] = { ["actionType"] = CraftingTool.actionType["3"], ["efficiency"] = "0", ["chance"] = "0", ["buffid"] = "261", ["name"] = "Comfort Zone", ["level"] = "50", ["cost"] = "66", ["length"] = "10", ["CC"]=true  }
         },
 		["ARM"] = {
-            ["100030"] = { ["actionType"] = CraftingTool.actionType["0"], ["efficiency"] = "100", ["chance"] = "90", ["buffid"] = "0", ["name"] = "Basic Synthesis", ["level"] = "1", ["cost"] = "0", ["CC"]=false },
-            ["100031"] = { ["actionType"] = CraftingTool.actionType["1"], ["efficiency"] = "100", ["chance"] = "70", ["buffid"] = "0", ["name"] = "Basic Touch", ["level"] = "5", ["cost"] = "18", ["CC"]=false },
-            ["100032"] = { ["actionType"] = CraftingTool.actionType["2"], ["efficiency"] = "30", ["chance"] = "30", ["buffid"] = "0", ["name"] = "Master's Mend", ["level"] = "7", ["cost"] = "92", ["CC"]=false },
-            ["246"] = { ["actionType"] = CraftingTool.actionType["3"], ["efficiency"] = "0", ["chance"] = "0", ["buffid"] = "253", ["name"] = "Steady Hand", ["level"] = "9", ["cost"] = "22", ["CC"]=false },
-            ["254"] = { ["actionType"] = CraftingTool.actionType["3"], ["efficiency"] = "0", ["chance"] = "0", ["buffid"] = "251", ["name"] = "Inner-Quiet", ["level"] = "11", ["cost"] = "18", ["CC"]=false },
-            ["100040"] = { ["actionType"] = CraftingTool.actionType["4"], ["efficiency"] = "1", ["chance"] = "100", ["buffid"] = "0", ["name"] = "Observe", ["level"] = "13", ["cost"] = "14", ["CC"]=false },
-            ["100033"] = { ["actionType"] = CraftingTool.actionType["0"], ["efficiency"] = "250", ["chance"] = "50", ["buffid"] = "0", ["name"] = "Rapid Synthesis", ["level"] = "15", ["cost"] = "0", ["CC"]=true },
-            ["100034"] = { ["actionType"] = CraftingTool.actionType["1"], ["efficiency"] = "125", ["chance"] = "80", ["buffid"] = "0", ["name"] = "Standard Touch", ["level"] = "18", ["cost"] = "32", ["CC"]=false },
-            ["262"] = { ["actionType"] = CraftingTool.actionType["3"], ["efficiency"] = "200", ["chance"] = "0", ["buffid"] = "254", ["name"] = "Great Strides", ["level"] = "21", ["cost"] = "0", ["CC"]=false },
-            ["100035"] = { ["actionType"] = CraftingTool.actionType["2"], ["efficiency"] = "60", ["chance"] = "60", ["buffid"] = "0", ["name"] = "Master's Mend II", ["level"] = "25", ["cost"] = "160", ["CC"]=false },
-            ["100037"] = { ["actionType"] = CraftingTool.actionType["0"], ["efficiency"] = "150", ["chance"] = "90", ["buffid"] = "0", ["name"] = "Standard Synthesis", ["level"] = "31", ["cost"] = "15", ["CC"]=false },
-            ["100036"] = { ["actionType"] = CraftingTool.actionType["0"], ["efficiency"] = "200", ["chance"] = "90", ["buffid"] = "0", ["name"] = "Brand of Ice", ["level"] = "37", ["cost"] = "15", ["CC"]=false },
-            ["100038"] = { ["actionType"] = CraftingTool.actionType["1"], ["efficiency"] = "150", ["chance"] = "90", ["buffid"] = "0", ["name"] = "Advanced Touch", ["level"] = "43", ["cost"] = "48", ["CC"]=false },
-            ["100039"] = { ["actionType"] = CraftingTool.actionType["0"], ["efficiency"] = "0", ["chance"] = "90", ["buffid"] = "0", ["name"] = "Piece By Piece", ["level"] = "50", ["cost"] = "15", ["CC"]=true  }
+            ["100030"] = { ["actionType"] = CraftingTool.actionType["0"], ["efficiency"] = "100", ["chance"] = "90", ["buffid"] = "0", ["name"] = "Basic Synthesis", ["level"] = "1", ["cost"] = "0", ["length"] = "0", ["CC"]=false },
+            ["100031"] = { ["actionType"] = CraftingTool.actionType["1"], ["efficiency"] = "100", ["chance"] = "70", ["buffid"] = "0", ["name"] = "Basic Touch", ["level"] = "5", ["cost"] = "18", ["length"] = "0", ["CC"]=false },
+            ["100032"] = { ["actionType"] = CraftingTool.actionType["2"], ["efficiency"] = "30", ["chance"] = "30", ["buffid"] = "0", ["name"] = "Master's Mend", ["level"] = "7", ["cost"] = "92", ["length"] = "0", ["CC"]=false },
+            ["246"] = { ["actionType"] = CraftingTool.actionType["3"], ["efficiency"] = "0", ["chance"] = "0", ["buffid"] = "253", ["name"] = "Steady Hand", ["level"] = "9", ["cost"] = "22", ["length"] = "5", ["CC"]=false },
+            ["254"] = { ["actionType"] = CraftingTool.actionType["3"], ["efficiency"] = "0", ["chance"] = "0", ["buffid"] = "251", ["name"] = "Inner Quiet", ["level"] = "11", ["cost"] = "18", ["length"] = "0", ["CC"]=false },
+            ["100040"] = { ["actionType"] = CraftingTool.actionType["4"], ["efficiency"] = "1", ["chance"] = "100", ["buffid"] = "0", ["name"] = "Observe", ["level"] = "13", ["cost"] = "14", ["length"] = "0", ["CC"]=false },
+            ["100033"] = { ["actionType"] = CraftingTool.actionType["0"], ["efficiency"] = "250", ["chance"] = "50", ["buffid"] = "0", ["name"] = "Rapid Synthesis", ["level"] = "15", ["cost"] = "0", ["length"] = "0", ["CC"]=true },
+            ["100034"] = { ["actionType"] = CraftingTool.actionType["1"], ["efficiency"] = "125", ["chance"] = "80", ["buffid"] = "0", ["name"] = "Standard Touch", ["level"] = "18", ["cost"] = "32", ["length"] = "0", ["CC"]=false },
+            ["262"] = { ["actionType"] = CraftingTool.actionType["3"], ["efficiency"] = "200", ["chance"] = "0", ["buffid"] = "254", ["name"] = "Great Strides", ["level"] = "21", ["cost"] = "0", ["length"] = "3", ["CC"]=false },
+            ["100035"] = { ["actionType"] = CraftingTool.actionType["2"], ["efficiency"] = "60", ["chance"] = "60", ["buffid"] = "0", ["name"] = "Master's Mend II", ["level"] = "25", ["cost"] = "160", ["length"] = "0", ["CC"]=false },
+            ["100037"] = { ["actionType"] = CraftingTool.actionType["0"], ["efficiency"] = "150", ["chance"] = "90", ["buffid"] = "0", ["name"] = "Standard Synthesis", ["level"] = "31", ["cost"] = "15", ["length"] = "0", ["CC"]=false },
+            ["100036"] = { ["actionType"] = CraftingTool.actionType["0"], ["efficiency"] = "200", ["chance"] = "90", ["buffid"] = "0", ["name"] = "Brand of Ice", ["level"] = "37", ["cost"] = "15", ["length"] = "0", ["CC"]=false },
+            ["100038"] = { ["actionType"] = CraftingTool.actionType["1"], ["efficiency"] = "150", ["chance"] = "90", ["buffid"] = "0", ["name"] = "Advanced Touch", ["level"] = "43", ["cost"] = "48", ["length"] = "0", ["CC"]=false },
+            ["100039"] = { ["actionType"] = CraftingTool.actionType["0"], ["efficiency"] = "0", ["chance"] = "90", ["buffid"] = "0", ["name"] = "Piece By Piece", ["level"] = "50", ["cost"] = "15", ["length"] = "0", ["CC"]=true  }
         },
 		["BSM"] = {
-            ["100015"] = { ["actionType"] = CraftingTool.actionType["0"], ["efficiency"] = "100", ["chance"] = "90", ["buffid"] = "0", ["name"] = "Basic Synthesis", ["level"] = "1", ["cost"] = "0", ["CC"]=false },
-            ["100016"] = { ["actionType"] = CraftingTool.actionType["1"], ["efficiency"] = "100", ["chance"] = "70", ["buffid"] = "0", ["name"] = "Basic Touch", ["level"] = "5", ["cost"] = "18", ["CC"]=false },
-            ["100017"] = { ["actionType"] = CraftingTool.actionType["2"], ["efficiency"] = "30", ["chance"] = "30", ["buffid"] = "0", ["name"] = "Master's Mend", ["level"] = "7", ["cost"] = "92", ["CC"]=false },
-            ["245"] = { ["actionType"] = CraftingTool.actionType["3"], ["efficiency"] = "0", ["chance"] = "0", ["buffid"] = "253", ["name"] = "Steady Hand", ["level"] = "9", ["cost"] = "22", ["CC"]=false },
-            ["253"] = { ["actionType"] = CraftingTool.actionType["3"], ["efficiency"] = "0", ["chance"] = "0", ["buffid"] = "251", ["name"] = "Inner-Quiet", ["level"] = "11", ["cost"] = "18", ["CC"]=false },
-            ["100023"] = { ["actionType"] = CraftingTool.actionType["4"], ["efficiency"] = "1", ["chance"] = "100", ["buffid"] = "0", ["name"] = "Observe", ["level"] = "13", ["cost"] = "14", ["CC"]=false },
-            ["277"] = { ["actionType"] = CraftingTool.actionType["3"], ["efficiency"] = "0", ["chance"] = "0", ["buffid"] = "255", ["name"] = "Ingenuity", ["level"] = "15", ["cost"] = "24", ["CC"]=true },
-            ["100018"] = { ["actionType"] = CraftingTool.actionType["1"], ["efficiency"] = "125", ["chance"] = "80", ["buffid"] = "0", ["name"] = "Standard Touch", ["level"] = "18", ["cost"] = "32", ["CC"]=false },
-            ["261"] = { ["actionType"] = CraftingTool.actionType["3"], ["efficiency"] = "200", ["chance"] = "0", ["buffid"] = "254", ["name"] = "Great Strides", ["level"] = "21", ["cost"] = "0", ["CC"]=false },
-            ["100019"] = { ["actionType"] = CraftingTool.actionType["2"], ["efficiency"] = "60", ["chance"] = "60", ["buffid"] = "0", ["name"] = "Master's Mend II", ["level"] = "25", ["cost"] = "160", ["CC"]=false },
-            ["100021"] = { ["actionType"] = CraftingTool.actionType["0"], ["efficiency"] = "150", ["chance"] = "90", ["buffid"] = "0", ["name"] = "Standard Synthesis", ["level"] = "31", ["cost"] = "15", ["CC"]=false },
-            ["100020"] = { ["actionType"] = CraftingTool.actionType["0"], ["efficiency"] = "200", ["chance"] = "90", ["buffid"] = "0", ["name"] = "Brand of Fire", ["level"] = "37", ["cost"] = "15", ["CC"]=false },
-            ["100022"] = { ["actionType"] = CraftingTool.actionType["1"], ["efficiency"] = "150", ["chance"] = "90", ["buffid"] = "0", ["name"] = "Advanced Touch", ["level"] = "43", ["cost"] = "48", ["CC"]=false },
-            ["283"] = { ["actionType"] = CraftingTool.actionType["3"], ["efficiency"] = "0", ["chance"] = "0", ["buffid"] = "256", ["name"] = "Ingenuity II", ["level"] = "50", ["cost"] = "32", ["CC"]=true  }
+            ["100015"] = { ["actionType"] = CraftingTool.actionType["0"], ["efficiency"] = "100", ["chance"] = "90", ["buffid"] = "0", ["name"] = "Basic Synthesis", ["level"] = "1", ["cost"] = "0", ["length"] = "0", ["CC"]=false },
+            ["100016"] = { ["actionType"] = CraftingTool.actionType["1"], ["efficiency"] = "100", ["chance"] = "70", ["buffid"] = "0", ["name"] = "Basic Touch", ["level"] = "5", ["cost"] = "18", ["length"] = "0", ["CC"]=false },
+            ["100017"] = { ["actionType"] = CraftingTool.actionType["2"], ["efficiency"] = "30", ["chance"] = "30", ["buffid"] = "0", ["name"] = "Master's Mend", ["level"] = "7", ["cost"] = "92", ["length"] = "0", ["CC"]=false },
+            ["245"] = { ["actionType"] = CraftingTool.actionType["3"], ["efficiency"] = "0", ["chance"] = "0", ["buffid"] = "253", ["name"] = "Steady Hand", ["level"] = "9", ["cost"] = "22", ["length"] = "5", ["CC"]=false },
+            ["253"] = { ["actionType"] = CraftingTool.actionType["3"], ["efficiency"] = "0", ["chance"] = "0", ["buffid"] = "251", ["name"] = "Inner Quiet", ["level"] = "11", ["cost"] = "18", ["length"] = "0", ["CC"]=false },
+            ["100023"] = { ["actionType"] = CraftingTool.actionType["4"], ["efficiency"] = "1", ["chance"] = "100", ["buffid"] = "0", ["name"] = "Observe", ["level"] = "13", ["cost"] = "14", ["length"] = "0", ["CC"]=false },
+            ["277"] = { ["actionType"] = CraftingTool.actionType["3"], ["efficiency"] = "0", ["chance"] = "0", ["buffid"] = "255", ["name"] = "Ingenuity", ["level"] = "15", ["cost"] = "24", ["length"] = "5", ["CC"]=true },
+            ["100018"] = { ["actionType"] = CraftingTool.actionType["1"], ["efficiency"] = "125", ["chance"] = "80", ["buffid"] = "0", ["name"] = "Standard Touch", ["level"] = "18", ["cost"] = "32", ["length"] = "0", ["CC"]=false },
+            ["261"] = { ["actionType"] = CraftingTool.actionType["3"], ["efficiency"] = "200", ["chance"] = "0", ["buffid"] = "254", ["name"] = "Great Strides", ["level"] = "21", ["cost"] = "0", ["length"] = "3", ["CC"]=false },
+            ["100019"] = { ["actionType"] = CraftingTool.actionType["2"], ["efficiency"] = "60", ["chance"] = "60", ["buffid"] = "0", ["name"] = "Master's Mend II", ["level"] = "25", ["cost"] = "160", ["length"] = "0", ["CC"]=false },
+            ["100021"] = { ["actionType"] = CraftingTool.actionType["0"], ["efficiency"] = "150", ["chance"] = "90", ["buffid"] = "0", ["name"] = "Standard Synthesis", ["level"] = "31", ["cost"] = "15", ["length"] = "0", ["CC"]=false },
+            ["100020"] = { ["actionType"] = CraftingTool.actionType["0"], ["efficiency"] = "200", ["chance"] = "90", ["buffid"] = "0", ["name"] = "Brand of Fire", ["level"] = "37", ["cost"] = "15", ["length"] = "0", ["CC"]=false },
+            ["100022"] = { ["actionType"] = CraftingTool.actionType["1"], ["efficiency"] = "150", ["chance"] = "90", ["buffid"] = "0", ["name"] = "Advanced Touch", ["level"] = "43", ["cost"] = "48", ["length"] = "0", ["CC"]=false },
+            ["283"] = { ["actionType"] = CraftingTool.actionType["3"], ["efficiency"] = "0", ["chance"] = "0", ["buffid"] = "256", ["name"] = "Ingenuity II", ["level"] = "50", ["cost"] = "32", ["length"] = "5", ["CC"]=true  }
         },
 		["GSM"] = {
-            ["100075"] = { ["actionType"] = CraftingTool.actionType["0"], ["efficiency"] = "100", ["chance"] = "90", ["buffid"] = "0", ["name"] = "Basic Synthesis", ["level"] = "1", ["cost"] = "0", ["CC"]=false },
-            ["100076"] = { ["actionType"] = CraftingTool.actionType["1"], ["efficiency"] = "100", ["chance"] = "70", ["buffid"] = "0", ["name"] = "Basic Touch", ["level"] = "5", ["cost"] = "18", ["CC"]=false },
-            ["100077"] = { ["actionType"] = CraftingTool.actionType["2"], ["efficiency"] = "30", ["chance"] = "30", ["buffid"] = "0", ["name"] = "Master's Mend", ["level"] = "7", ["cost"] = "92", ["CC"]=false },
-            ["247"] = { ["actionType"] = CraftingTool.actionType["3"], ["efficiency"] = "0", ["chance"] = "0", ["buffid"] = "253", ["name"] = "Steady Hand", ["level"] = "9", ["cost"] = "22", ["CC"]=false },
-            ["255"] = { ["actionType"] = CraftingTool.actionType["3"], ["efficiency"] = "0", ["chance"] = "0", ["buffid"] = "251", ["name"] = "Inner-Quiet", ["level"] = "11", ["cost"] = "18", ["CC"]=false },
-            ["100082"] = { ["actionType"] = CraftingTool.actionType["4"], ["efficiency"] = "1", ["chance"] = "100", ["buffid"] = "0", ["name"] = "Observe", ["level"] = "13", ["cost"] = "14", ["CC"]=false },
-            ["278"] = { ["actionType"] = CraftingTool.actionType["3"], ["efficiency"] = "30", ["chance"] = "0", ["buffid"] = "258", ["name"] = "Manipulation", ["level"] = "15", ["cost"] = "88", ["CC"]=true },
-            ["100078"] = { ["actionType"] = CraftingTool.actionType["1"], ["efficiency"] = "125", ["chance"] = "80", ["buffid"] = "0", ["name"] = "Standard Touch", ["level"] = "18", ["cost"] = "32", ["CC"]=false },
-            ["263"] = { ["actionType"] = CraftingTool.actionType["3"], ["efficiency"] = "200", ["chance"] = "0", ["buffid"] = "254", ["name"] = "Great Strides", ["level"] = "21", ["cost"] = "0", ["CC"]=false },
-            ["100079"] = { ["actionType"] = CraftingTool.actionType["2"], ["efficiency"] = "60", ["chance"] = "60", ["buffid"] = "0", ["name"] = "Master's Mend II", ["level"] = "25", ["cost"] = "160", ["CC"]=false },
-            ["100080"] = { ["actionType"] = CraftingTool.actionType["0"], ["efficiency"] = "150", ["chance"] = "90", ["buffid"] = "0", ["name"] = "Standard Synthesis", ["level"] = "31", ["cost"] = "15", ["CC"]=false },
-            ["100083"] = { ["actionType"] = CraftingTool.actionType["0"], ["efficiency"] = "0", ["chance"] = "90", ["buffid"] = "0", ["name"] = "Flawless Synthesis", ["level"] = "37", ["cost"] = "15", ["CC"]=true },
-            ["100081"] = { ["actionType"] = CraftingTool.actionType["1"], ["efficiency"] = "150", ["chance"] = "90", ["buffid"] = "0", ["name"] = "Advanced Touch", ["level"] = "43", ["cost"] = "48", ["CC"]=false },
-            ["284"] = { ["actionType"] = CraftingTool.actionType["3"], ["efficiency"] = "50", ["chance"] = "0", ["buffid"] = "259", ["name"] = "Innovation", ["level"] = "50", ["cost"] = "18", ["CC"]=true  }
+            ["100075"] = { ["actionType"] = CraftingTool.actionType["0"], ["efficiency"] = "100", ["chance"] = "90", ["buffid"] = "0", ["name"] = "Basic Synthesis", ["level"] = "1", ["cost"] = "0", ["length"] = "0", ["CC"]=false },
+            ["100076"] = { ["actionType"] = CraftingTool.actionType["1"], ["efficiency"] = "100", ["chance"] = "70", ["buffid"] = "0", ["name"] = "Basic Touch", ["level"] = "5", ["cost"] = "18", ["length"] = "0", ["CC"]=false },
+            ["100077"] = { ["actionType"] = CraftingTool.actionType["2"], ["efficiency"] = "30", ["chance"] = "30", ["buffid"] = "0", ["name"] = "Master's Mend", ["level"] = "7", ["cost"] = "92", ["length"] = "0", ["CC"]=false },
+            ["247"] = { ["actionType"] = CraftingTool.actionType["3"], ["efficiency"] = "0", ["chance"] = "0", ["buffid"] = "253", ["name"] = "Steady Hand", ["level"] = "9", ["cost"] = "22", ["length"] = "5", ["CC"]=false },
+            ["255"] = { ["actionType"] = CraftingTool.actionType["3"], ["efficiency"] = "0", ["chance"] = "0", ["buffid"] = "251", ["name"] = "Inner Quiet", ["level"] = "11", ["cost"] = "18", ["length"] = "0", ["CC"]=false },
+            ["100082"] = { ["actionType"] = CraftingTool.actionType["4"], ["efficiency"] = "1", ["chance"] = "100", ["buffid"] = "0", ["name"] = "Observe", ["level"] = "13", ["cost"] = "14", ["length"] = "0", ["CC"]=false },
+            ["278"] = { ["actionType"] = CraftingTool.actionType["3"], ["efficiency"] = "30", ["chance"] = "0", ["buffid"] = "258", ["name"] = "Manipulation", ["level"] = "15", ["cost"] = "88", ["length"] = "0", ["CC"]=true },
+            ["100078"] = { ["actionType"] = CraftingTool.actionType["1"], ["efficiency"] = "125", ["chance"] = "80", ["buffid"] = "0", ["name"] = "Standard Touch", ["level"] = "18", ["cost"] = "32", ["length"] = "0", ["CC"]=false },
+            ["263"] = { ["actionType"] = CraftingTool.actionType["3"], ["efficiency"] = "200", ["chance"] = "0", ["buffid"] = "254", ["name"] = "Great Strides", ["level"] = "21", ["cost"] = "0", ["length"] = "3", ["CC"]=false },
+            ["100079"] = { ["actionType"] = CraftingTool.actionType["2"], ["efficiency"] = "60", ["chance"] = "60", ["buffid"] = "0", ["name"] = "Master's Mend II", ["level"] = "25", ["cost"] = "160", ["length"] = "0", ["CC"]=false },
+            ["100080"] = { ["actionType"] = CraftingTool.actionType["0"], ["efficiency"] = "150", ["chance"] = "90", ["buffid"] = "0", ["name"] = "Standard Synthesis", ["level"] = "31", ["cost"] = "15", ["length"] = "0", ["CC"]=false },
+            ["100083"] = { ["actionType"] = CraftingTool.actionType["0"], ["efficiency"] = "0", ["chance"] = "90", ["buffid"] = "0", ["name"] = "Flawless Synthesis", ["level"] = "37", ["cost"] = "15", ["length"] = "0", ["CC"]=true },
+            ["100081"] = { ["actionType"] = CraftingTool.actionType["1"], ["efficiency"] = "150", ["chance"] = "90", ["buffid"] = "0", ["name"] = "Advanced Touch", ["level"] = "43", ["cost"] = "48", ["length"] = "0", ["CC"]=false },
+            ["284"] = { ["actionType"] = CraftingTool.actionType["3"], ["efficiency"] = "50", ["chance"] = "0", ["buffid"] = "259", ["name"] = "Innovation", ["level"] = "50", ["cost"] = "18", ["length"] = "3", ["CC"]=true  }
         },
 		["LTW"] = {
-            ["100045"] = { ["actionType"] = CraftingTool.actionType["0"], ["efficiency"] = "100", ["chance"] = "90", ["buffid"] = "0", ["name"] = "Basic Synthesis", ["level"] = "1", ["cost"] = "0", ["CC"]=false },
-            ["100046"] = { ["actionType"] = CraftingTool.actionType["1"], ["efficiency"] = "100", ["chance"] = "70", ["buffid"] = "0", ["name"] = "Basic Touch", ["level"] = "5", ["cost"] = "18", ["CC"]=false },
-            ["100047"] = { ["actionType"] = CraftingTool.actionType["2"], ["efficiency"] = "30", ["chance"] = "30", ["buffid"] = "0", ["name"] = "Master's Mend", ["level"] = "7", ["cost"] = "92", ["CC"]=false },
-            ["249"] = { ["actionType"] = CraftingTool.actionType["3"], ["efficiency"] = "0", ["chance"] = "0", ["buffid"] = "253", ["name"] = "Steady Hand", ["level"] = "9", ["cost"] = "22", ["CC"]=false },
-            ["257"] = { ["actionType"] = CraftingTool.actionType["3"], ["efficiency"] = "0", ["chance"] = "0", ["buffid"] = "251", ["name"] = "Inner-Quiet", ["level"] = "11", ["cost"] = "18", ["CC"]=false },
-            ["100053"] = { ["actionType"] = CraftingTool.actionType["4"], ["efficiency"] = "1", ["chance"] = "100", ["buffid"] = "0", ["name"] = "Observe", ["level"] = "13", ["cost"] = "14", ["CC"]=false },
-            ["279"] = { ["actionType"] = CraftingTool.actionType["3"], ["efficiency"] = "0", ["chance"] = "100", ["buffid"] = "252", ["name"] = "Waste Not", ["level"] = "15", ["cost"] = "56", ["CC"]=true },
-            ["100048"] = { ["actionType"] = CraftingTool.actionType["1"], ["efficiency"] = "125", ["chance"] = "80", ["buffid"] = "0", ["name"] = "Standard Touch", ["level"] = "18", ["cost"] = "32", ["CC"]=false },
-            ["265"] = { ["actionType"] = CraftingTool.actionType["3"], ["efficiency"] = "200", ["chance"] = "90", ["buffid"] = "254", ["name"] = "Great Strides", ["level"] = "21", ["cost"] = "32", ["CC"]=false },
-            ["100049"] = { ["actionType"] = CraftingTool.actionType["2"], ["efficiency"] = "60", ["chance"] = "60", ["buffid"] = "0", ["name"] = "Master's Mend II", ["level"] = "25", ["cost"] = "160", ["CC"]=false },
-            ["100051"] = { ["actionType"] = CraftingTool.actionType["0"], ["efficiency"] = "150", ["chance"] = "90", ["buffid"] = "0", ["name"] = "Standard Synthesis", ["level"] = "31", ["cost"] = "15", ["CC"]=false },
-            ["100050"] = { ["actionType"] = CraftingTool.actionType["0"], ["efficiency"] = "200", ["chance"] = "90", ["buffid"] = "0", ["name"] = "Brand Of Earth", ["level"] = "37", ["cost"] = "15", ["CC"]=false },
-            ["100052"] = { ["actionType"] = CraftingTool.actionType["1"], ["efficiency"] = "150", ["chance"] = "90", ["buffid"] = "0", ["name"] = "Advanced Touch", ["level"] = "43", ["cost"] = "48", ["CC"]=false },
-            ["285"] = { ["actionType"] = CraftingTool.actionType["3"], ["efficiency"] = "0", ["chance"] = "90", ["buffid"] = "257", ["name"] = "Waste Not II", ["level"] = "50", ["cost"] = "98", ["CC"]=true  }
+            ["100045"] = { ["actionType"] = CraftingTool.actionType["0"], ["efficiency"] = "100", ["chance"] = "90", ["buffid"] = "0", ["name"] = "Basic Synthesis", ["level"] = "1", ["cost"] = "0", ["length"] = "0", ["CC"]=false },
+            ["100046"] = { ["actionType"] = CraftingTool.actionType["1"], ["efficiency"] = "100", ["chance"] = "70", ["buffid"] = "0", ["name"] = "Basic Touch", ["level"] = "5", ["cost"] = "18", ["length"] = "0", ["CC"]=false },
+            ["100047"] = { ["actionType"] = CraftingTool.actionType["2"], ["efficiency"] = "30", ["chance"] = "30", ["buffid"] = "0", ["name"] = "Master's Mend", ["level"] = "7", ["cost"] = "92", ["length"] = "0", ["CC"]=false },
+            ["249"] = { ["actionType"] = CraftingTool.actionType["3"], ["efficiency"] = "0", ["chance"] = "0", ["buffid"] = "253", ["name"] = "Steady Hand", ["level"] = "9", ["cost"] = "22", ["length"] = "5", ["CC"]=false },
+            ["257"] = { ["actionType"] = CraftingTool.actionType["3"], ["efficiency"] = "0", ["chance"] = "0", ["buffid"] = "251", ["name"] = "Inner Quiet", ["level"] = "11", ["cost"] = "18", ["length"] = "0", ["CC"]=false },
+            ["100053"] = { ["actionType"] = CraftingTool.actionType["4"], ["efficiency"] = "1", ["chance"] = "100", ["buffid"] = "0", ["name"] = "Observe", ["level"] = "13", ["cost"] = "14", ["length"] = "0", ["CC"]=false },
+            ["279"] = { ["actionType"] = CraftingTool.actionType["3"], ["efficiency"] = "0", ["chance"] = "100", ["buffid"] = "252", ["name"] = "Waste Not", ["level"] = "15", ["cost"] = "56", ["length"] = "4", ["CC"]=true },
+            ["100048"] = { ["actionType"] = CraftingTool.actionType["1"], ["efficiency"] = "125", ["chance"] = "80", ["buffid"] = "0", ["name"] = "Standard Touch", ["level"] = "18", ["cost"] = "32", ["length"] = "0", ["CC"]=false },
+            ["265"] = { ["actionType"] = CraftingTool.actionType["3"], ["efficiency"] = "200", ["chance"] = "90", ["buffid"] = "254", ["name"] = "Great Strides", ["level"] = "21", ["cost"] = "32", ["length"] = "3", ["CC"]=false },
+            ["100049"] = { ["actionType"] = CraftingTool.actionType["2"], ["efficiency"] = "60", ["chance"] = "60", ["buffid"] = "0", ["name"] = "Master's Mend II", ["level"] = "25", ["cost"] = "160", ["length"] = "0", ["CC"]=false },
+            ["100051"] = { ["actionType"] = CraftingTool.actionType["0"], ["efficiency"] = "150", ["chance"] = "90", ["buffid"] = "0", ["name"] = "Standard Synthesis", ["level"] = "31", ["cost"] = "15", ["length"] = "0", ["CC"]=false },
+            ["100050"] = { ["actionType"] = CraftingTool.actionType["0"], ["efficiency"] = "200", ["chance"] = "90", ["buffid"] = "0", ["name"] = "Brand Of Earth", ["level"] = "37", ["cost"] = "15", ["length"] = "0", ["CC"]=false },
+            ["100052"] = { ["actionType"] = CraftingTool.actionType["1"], ["efficiency"] = "150", ["chance"] = "90", ["buffid"] = "0", ["name"] = "Advanced Touch", ["level"] = "43", ["cost"] = "48", ["length"] = "0", ["CC"]=false },
+            ["285"] = { ["actionType"] = CraftingTool.actionType["3"], ["efficiency"] = "0", ["chance"] = "90", ["buffid"] = "257", ["name"] = "Waste Not II", ["level"] = "50", ["cost"] = "98", ["length"] = "8", ["CC"]=true  }
         },
 		["CRP"] = {
-            ["100001"] = { ["actionType"] = CraftingTool.actionType["0"], ["efficiency"] = "100", ["chance"] = "90", ["buffid"] = "0", ["name"] = "Basic Synthesis", ["level"] = "1", ["cost"] = "0", ["CC"]=false },
-            ["100002"] = { ["actionType"] = CraftingTool.actionType["1"], ["efficiency"] = "100", ["chance"] = "70", ["buffid"] = "0", ["name"] = "Basic Touch", ["level"] = "5", ["cost"] = "18", ["CC"]=false },
-            ["100003"] = { ["actionType"] = CraftingTool.actionType["2"], ["efficiency"] = "30", ["chance"] = "30", ["buffid"] = "0", ["name"] = "Master's Mend", ["level"] = "7", ["cost"] = "92", ["CC"]=false },
-            ["244"] = { ["actionType"] = CraftingTool.actionType["3"], ["efficiency"] = "0", ["chance"] = "0", ["buffid"] = "253", ["name"] = "Steady Hand", ["level"] = "9", ["cost"] = "22", ["CC"]=false },
-            ["252"] = { ["actionType"] = CraftingTool.actionType["3"], ["efficiency"] = "0", ["chance"] = "0", ["buffid"] = "251", ["name"] = "Inner-Quiet", ["level"] = "11", ["cost"] = "18", ["CC"]=false },
-            ["100010"] = { ["actionType"] = CraftingTool.actionType["4"], ["efficiency"] = "1", ["chance"] = "100", ["buffid"] = "0", ["name"] = "Observe", ["level"] = "13", ["cost"] = "14", ["CC"]=false },
-            ["276"] = { ["actionType"] = CraftingTool.actionType["3"], ["efficiency"] = "100", ["chance"] = "100", ["buffid"] = "276", ["name"] = "Rumination", ["level"] = "15", ["cost"] = "0", ["CC"]=true },
-            ["100004"] = { ["actionType"] = CraftingTool.actionType["1"], ["efficiency"] = "125", ["chance"] = "80", ["buffid"] = "0", ["name"] = "Standard Touch", ["level"] = "18", ["cost"] = "32", ["CC"]=false },
-            ["260"] = { ["actionType"] = CraftingTool.actionType["3"], ["efficiency"] = "200", ["chance"] = "90", ["buffid"] = "254", ["name"] = "Great Strides", ["level"] = "21", ["cost"] = "32", ["CC"]=false },
-            ["100005"] = { ["actionType"] = CraftingTool.actionType["2"], ["efficiency"] = "60", ["chance"] = "60", ["buffid"] = "0", ["name"] = "Master's Mend II", ["level"] = "25", ["cost"] = "160", ["CC"]=false },
-            ["100007"] = { ["actionType"] = CraftingTool.actionType["0"], ["efficiency"] = "150", ["chance"] = "90", ["buffid"] = "0", ["name"] = "Standard Synthesis", ["level"] = "31", ["cost"] = "15", ["CC"]=false },
-            ["100006"] = { ["actionType"] = CraftingTool.actionType["0"], ["efficiency"] = "200", ["chance"] = "90", ["buffid"] = "0", ["name"] = "Brand Of Wind", ["level"] = "37", ["cost"] = "15", ["CC"]=false },
-            ["100008"] = { ["actionType"] = CraftingTool.actionType["1"], ["efficiency"] = "150", ["chance"] = "90", ["buffid"] = "0", ["name"] = "Advanced Touch", ["level"] = "43", ["cost"] = "48", ["CC"]=false },
-            ["100009"] = { ["actionType"] = CraftingTool.actionType["1"], ["efficiency"] = "100", ["chance"] = "90", ["buffid"] = "0", ["name"] = "Byregot's Blessing", ["level"] = "50", ["cost"] = "24", ["CC"]=true  }
+            ["100001"] = { ["actionType"] = CraftingTool.actionType["0"], ["efficiency"] = "100", ["chance"] = "90", ["buffid"] = "0", ["name"] = "Basic Synthesis", ["level"] = "1", ["cost"] = "0", ["length"] = "0", ["CC"]=false },
+            ["100002"] = { ["actionType"] = CraftingTool.actionType["1"], ["efficiency"] = "100", ["chance"] = "70", ["buffid"] = "0", ["name"] = "Basic Touch", ["level"] = "5", ["cost"] = "18", ["length"] = "0", ["CC"]=false },
+            ["100003"] = { ["actionType"] = CraftingTool.actionType["2"], ["efficiency"] = "30", ["chance"] = "30", ["buffid"] = "0", ["name"] = "Master's Mend", ["level"] = "7", ["cost"] = "92", ["length"] = "0", ["CC"]=false },
+            ["244"] = { ["actionType"] = CraftingTool.actionType["3"], ["efficiency"] = "0", ["chance"] = "0", ["buffid"] = "253", ["name"] = "Steady Hand", ["level"] = "9", ["cost"] = "22", ["length"] = "5", ["CC"]=false },
+            ["252"] = { ["actionType"] = CraftingTool.actionType["3"], ["efficiency"] = "0", ["chance"] = "0", ["buffid"] = "251", ["name"] = "Inner Quiet", ["level"] = "11", ["cost"] = "18", ["length"] = "0", ["CC"]=false },
+            ["100010"] = { ["actionType"] = CraftingTool.actionType["4"], ["efficiency"] = "1", ["chance"] = "100", ["buffid"] = "0", ["name"] = "Observe", ["level"] = "13", ["cost"] = "14", ["length"] = "0", ["CC"]=false },
+            ["276"] = { ["actionType"] = CraftingTool.actionType["3"], ["efficiency"] = "100", ["chance"] = "100", ["buffid"] = "276", ["name"] = "Rumination", ["level"] = "15", ["cost"] = "0", ["length"] = "0", ["CC"]=true },
+            ["100004"] = { ["actionType"] = CraftingTool.actionType["1"], ["efficiency"] = "125", ["chance"] = "80", ["buffid"] = "0", ["name"] = "Standard Touch", ["level"] = "18", ["cost"] = "32", ["length"] = "0", ["CC"]=false },
+            ["260"] = { ["actionType"] = CraftingTool.actionType["3"], ["efficiency"] = "200", ["chance"] = "90", ["buffid"] = "254", ["name"] = "Great Strides", ["level"] = "21", ["cost"] = "32", ["length"] = "3", ["CC"]=false },
+            ["100005"] = { ["actionType"] = CraftingTool.actionType["2"], ["efficiency"] = "60", ["chance"] = "60", ["buffid"] = "0", ["name"] = "Master's Mend II", ["level"] = "25", ["cost"] = "160", ["length"] = "0", ["CC"]=false },
+            ["100007"] = { ["actionType"] = CraftingTool.actionType["0"], ["efficiency"] = "150", ["chance"] = "90", ["buffid"] = "0", ["name"] = "Standard Synthesis", ["level"] = "31", ["cost"] = "15", ["length"] = "0", ["CC"]=false },
+            ["100006"] = { ["actionType"] = CraftingTool.actionType["0"], ["efficiency"] = "200", ["chance"] = "90", ["buffid"] = "0", ["name"] = "Brand Of Wind", ["level"] = "37", ["cost"] = "15", ["length"] = "0", ["CC"]=false },
+            ["100008"] = { ["actionType"] = CraftingTool.actionType["1"], ["efficiency"] = "150", ["chance"] = "90", ["buffid"] = "0", ["name"] = "Advanced Touch", ["level"] = "43", ["cost"] = "48", ["length"] = "0", ["CC"]=false },
+            ["100009"] = { ["actionType"] = CraftingTool.actionType["1"], ["efficiency"] = "100", ["chance"] = "90", ["buffid"] = "0", ["name"] = "Byregot's Blessing", ["level"] = "50", ["cost"] = "24", ["length"] = "0", ["CC"]=true  }
         }
 	}
+	
+	itemLevel = 1
+	craftsmanship = 0
+	control = 0
+	baseEfficiency = 1.0
 	
 	for z=8,15 do
 		local theProf = getProf(z)
@@ -269,6 +284,7 @@ function Initialise()
 					["actionType"] = e.actionType,
 					["efficiency"] = "100", ["chance"] = tonumber(e.chance),
 					["buffid"] = tonumber(e.buffid),
+					["length"] = tonumber(e.length),
 					["CC"] = e.CC
 					}
 					found = true
@@ -281,6 +297,7 @@ function Initialise()
 					["actionType"] = e.actionType,
 					["efficiency"] = "100", ["chance"] = tonumber(e.chance),
 					["buffid"] = tonumber(e.buffid),
+					["length"] = tonumber(e.length),
 					["CC"] = e.CC
 					}
 				end
@@ -293,7 +310,7 @@ function Initialise()
 						if(theCCProf ~= theProf) then
 							CraftingTool.Skills[theCCProf]["CC"..ccindex] = CraftingTool.Skills[theProf][sName]
 							if(e.actionType == CraftingTool.actionType["3"]) then
-								CraftingTool.Buffs[theCCProf]["CC"..ccindex] = { ["id"] = tonumber(e.buffid), ["length"] = 0 }
+								CraftingTool.Buffs[theCCProf]["CC"..ccindex] = { ["id"] = tonumber(e.buffid), ["length"] = tonumber(e.length) }
 							end
 							aTo = aTo .. theCCProf .. " "
 						end
@@ -303,7 +320,7 @@ function Initialise()
 				end
 				
 				if(e.actionType == CraftingTool.actionType["3"]) then
-					CraftingTool.Buffs[theProf][sName] = { ["id"] = tonumber(e.buffid), ["length"] = 0 }
+					CraftingTool.Buffs[theProf][sName] = { ["id"] = tonumber(e.buffid), ["length"] = tonumber(e.length) }
 					d("BUFF => " .. CraftingTool.Buffs[theProf][sName].id .. " " .. CraftingTool.Buffs[theProf][sName].length)
 				end
 				
@@ -403,22 +420,19 @@ function CraftingTool.Update(Event, ticks)
 					CraftingTool.prevItemId = synth.itemid
 					CraftingTool.ProgressGain = 0
 					CraftingTool.QualityGain = 0
+					CraftingTool.InnerQuietStacks = 0
 					CraftingTool.FirstUse = false
 					CraftingTool.FirstUseLevel = 0
 				end
-				-- I could simply calculate this each step to make sure that it works, but it seems better to not.
-				if (not CraftingTool.FirstUse or CraftingTool.FirstUseLevel ~= Player.level or CraftingTool.ProgressGain == 0 or CraftingTool.QualityGain == 0) then
-					--d("Progress Prediction: ".. tostring(ProgressPrediction(tonumber(itemLevel), tonumber(craftsmanship))))
-					--d("Quality Prediction: ".. tostring(QualityPrediction(tonumber(itemLevel), tonumber(control))))
-					CraftingTool.ProgressGain = tonumber(ProgressPrediction(tonumber(itemLevel), tonumber(craftsmanship)))
-					CraftingTool.QualityGain = tonumber(QualityPrediction(tonumber(itemLevel), tonumber(control)))
+				
+				--d("Progress Prediction: ".. tostring(ProgressPrediction(tonumber(itemLevel), tonumber(craftsmanship))))
+				--d("Quality Prediction: ".. tostring(QualityPrediction(tonumber(itemLevel), tonumber(control))))
+				CraftingTool.ProgressGain = tonumber(ProgressPrediction(tonumber(itemLevel), tonumber(craftsmanship))) * baseEfficiency
+				CraftingTool.QualityGain = tonumber(QualityPrediction(tonumber(itemLevel), tonumber(control)))
+				
+				for i,k in pairs(CraftingTool.TypeBlacklist) do
+					k = false
 				end
-				--if(not CraftingTool.FirstUse) then
-				--	if(synth.progress > 0) then
-				--		CraftingTool.ProgressGain = synth.progress
-				--		CraftingTool.FirstUse = true
-				--	end
-				--end
 				
 				local skill = SelectSkill(synth)
 				if(skill) then
@@ -456,22 +470,22 @@ function SelectStepType(synth)
 	
 	local stepsToFinish = tonumber(StepsToFinish((progressmax - progress)))
 	stepsLeft = tostring(stepsToFinish)
-	if(description == "Good" and playerCPMax - playerCP > 17 and useSkip == "1") then
-		return CraftingTool.actionType["4"] --Skip (tricks)
-	elseif((not CraftingTool.FirstUse or description == "Poor") and stepsToFinish ~= 1) then
+	if(not CraftingTool.TypeBlacklist["Skip"] and description == "Good" and playerCPMax - playerCP > 17 and useSkip == "1") then
+		return CraftingTool.actionType["4"] --Skip
+	elseif(not CraftingTool.TypeBlacklist["Progress"] and description == "Poor" and stepsToFinish ~= 1) then
 		return CraftingTool.actionType["0"] --Craft
-	elseif(durability == 10 and playerCP > 91 and useDurability == "1") then
+	elseif(not CraftingTool.TypeBlacklist["Durability"] and durability == 10 and useDurability == "1") then
 		return CraftingTool.actionType["2"] --Durability
-	elseif(durability == stepsToFinish * 10) then
+	elseif(not CraftingTool.TypeBlacklist["Progress"] and durability == stepsToFinish * 10) then
 		return CraftingTool.actionType["0"] --Craft
-	elseif(durability > 10 and (description == "Excellent" or description == "Good") and playerCP > 17 and useQuality == "1") then
+	elseif(not CraftingTool.TypeBlacklist["Quality"] and durability > 10 and (description == "Excellent" or description == "Good") and useQuality == "1") then
 		return CraftingTool.actionType["1"] --Quality
-	elseif(NeedToRecastBuffs() and playerCP > 24 and useBuff == "1") then
+	elseif(not CraftingTool.TypeBlacklist["Buff"] and NeedToRecastBuffs() and useBuff == "1") then
 		return CraftingTool.actionType["3"] --Buffs
 	else
-		if(durability > 10 and useQuality == "1" and qualitymax - quality ~= 0) then
+		if(not CraftingTool.TypeBlacklist["Quality"] and durability > 10 and useQuality == "1" and qualitymax - quality ~= 0) then
 			return CraftingTool.actionType["1"] --Quality 
-		else
+		else -- can always do a craft action
 			return CraftingTool.actionType["0"] --Craft
 		end
 	end
@@ -514,7 +528,7 @@ function SelectSkill(synth)
 							--d("Checking against " .. k.name)
 							if(stepType == CraftingTool.actionType["0"]) then
 								if(bestSkill ~= nil) then
-									if((k.chance >= bestSkill.chance or k.efficiency >= bestSkill.efficiency)) then
+									if((k.chance >= bestSkill.chance or k.efficiency >= bestSkill.efficiency)) then -- this needs to account for rapid synth... when would someone want to use that?
 										bestSkill = k
 									end
 								else
@@ -522,38 +536,31 @@ function SelectSkill(synth)
 								end
 							elseif(stepType == CraftingTool.actionType["1"]) then
 								if(bestSkill ~= nil) then
-									if (synth.description == "Excellent" or synth.description == "Good") then
+									if (synth.description == "Excellent" or synth.description == "Good") then -- use best touch
 										if(k.cost <= playerCP and k.efficiency >= bestSkill.efficiency and k.cost ~= 0) then
 											bestSkill = k
 										end
-									elseif(k.cost == 0) then
+									elseif(k.cost < bestSkill.cost) then -- use cheapest touch if no modifier
 										bestSkill = k
 									end
 								else
 									bestSkill = k
 								end
 							elseif(stepType == CraftingTool.actionType["2"]) then
-								if(synth.durabilitymax - synth.durability > 50) then
-									if(k.chance > 50) then bestSkill = k end
-								else
-									if(k.chance < 50) then bestSkill = k end
-								end
-								if(bestSkill == nil) then
-										bestSkill = k
+								if (k.cost <= playerCP) then
+									if(synth.durabilitymax - synth.durability > 50) then
+										if(k.chance > 50) then bestSkill = k end
+									else
+										if(k.chance < 50) then bestSkill = k end
+									end
 								end
 							elseif(stepType == CraftingTool.actionType["3"]) then
 								if(not IfPlayerHasBuff(k.buffid) and k.cost <= playerCP) then
 									bestSkill = k
 								end
-								if(bestSkill == nil) then
-										bestSkill = k
-								end
 							elseif(stepType == CraftingTool.actionType["4"]) then
 								if (k.id == 100098) then -- this is hackish, need to make it better (but who uses observe?)
 									bestSkill = k
-								end
-								if(bestSkill == nil) then
-										bestSkill = k
 								end
 							end
 						end
@@ -562,6 +569,13 @@ function SelectSkill(synth)
 			end
 		end
 	end
+	
+	if (bestSkill == nil or bestSkill.cost > playerCP) then
+		d("Blacklisting " ..stepType)
+		CraftingTool.TypeBlacklist[stepType] = true
+		return SelectSkill(synth)
+	end
+	
 	d("STEP=>" .. stepType .. " SKILL=>" .. bestSkill.name)
 	return bestSkill
 end
@@ -584,7 +598,7 @@ function UseSkill(Skill)
 	for i,k in pairs(CraftingTool.Buffs[gCraftProf]) do
 		k.length = ((k.length - 1 >= 0) and k.length - 1 or 0)
 	end
-	CraftingTool.WaitTime = 3000
+	CraftingTool.WaitTime = 3500
 	ActionList:Cast(Skill.id,0)
 end
 
