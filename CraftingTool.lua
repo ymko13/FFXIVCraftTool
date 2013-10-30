@@ -431,7 +431,7 @@ function CraftingTool.Update(Event, ticks)
 				CraftingTool.QualityGain = tonumber(QualityPrediction(tonumber(itemLevel), tonumber(control)))
 				
 				for i,k in pairs(CraftingTool.TypeBlacklist) do
-					k = false
+					CraftingTool.TypeBlacklist[i] = false
 				end
 				
 				local skill = SelectSkill(synth)
@@ -469,7 +469,8 @@ function SelectStepType(synth)
 	local playerCPMax = Player.cp.max
 	
 	local stepsToFinish = tonumber(StepsToFinish((progressmax - progress)))
-	stepsLeft = tostring(stepsToFinish)
+	
+	--d("Steps: " ..stepsToFinish.. " Progress: " ..progress.. " Max: " ..progressmax.. " Qual: " ..quality.. " Max: " ..qualitymax.. " Dura: " ..durability.. " CP: " ..playerCP.. " Max: " ..playerCPMax)stepsLeft = tostring(stepsToFinish)
 	if(not CraftingTool.TypeBlacklist["Skip"] and description == "Good" and playerCPMax - playerCP > 17 and useSkip == "1") then
 		return CraftingTool.actionType["4"] --Skip
 	elseif(not CraftingTool.TypeBlacklist["Progress"] and description == "Poor" and stepsToFinish ~= 1) then
@@ -494,9 +495,9 @@ end
 function NeedToRecastBuffs()
 	local needtorecast = false
 	for i,k in pairs(CraftingTool.Buffs[gCraftProf]) do
-		d("Checking Buff: " ..k.id)
+		--d("Checking Buff: " ..k.id)
 		if(not IfPlayerHasBuff(k.id)) then
-			d("Buff not Active " ..gCraftProf .."."..i)
+			--d("Buff not Active " ..gCraftProf .."."..i)
 			if(_G[gCraftProf .."."..i] == "1") then
 				if(Player.cp.current >= CraftingTool.Skills[gCraftProf][i].cost) then
 					needtorecast = true
@@ -598,7 +599,7 @@ function UseSkill(Skill)
 	for i,k in pairs(CraftingTool.Buffs[gCraftProf]) do
 		k.length = ((k.length - 1 >= 0) and k.length - 1 or 0)
 	end
-	CraftingTool.WaitTime = 3500
+	CraftingTool.WaitTime = 3000
 	ActionList:Cast(Skill.id,0)
 end
 
