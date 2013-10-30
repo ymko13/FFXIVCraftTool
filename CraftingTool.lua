@@ -464,7 +464,7 @@ function SelectStepType(synth)
 		return CraftingTool.actionType["2"] --Durability
 	elseif(durability == stepsToFinish * 10) then
 		return CraftingTool.actionType["0"] --Craft
-	elseif(durability > 10 and (description == "Excellent" or description == "Good") and useQuality == "1") then
+	elseif(durability > 10 and (description == "Excellent" or description == "Good") and playerCP > 17 and useQuality == "1") then
 		return CraftingTool.actionType["1"] --Quality
 	elseif(NeedToRecastBuffs() and playerCP > 24 and useBuff == "1") then
 		return CraftingTool.actionType["3"] --Buffs
